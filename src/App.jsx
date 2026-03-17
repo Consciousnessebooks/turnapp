@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Calendar, Users, DollarSign, XCircle, Clock, Bell, Search, Filter, ChevronLeft, ChevronRight, Settings, LogOut, Shield, Plus, Edit3, Trash2, Phone, Mail, AlertTriangle, CheckCircle, Send, Eye, ArrowLeft, Home, UserPlus, TrendingUp, X, Check, LayoutList, CalendarDays, RefreshCw, Star } from "lucide-react";
 
 // ─── DATA ───

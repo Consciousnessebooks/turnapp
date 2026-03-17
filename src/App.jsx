@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { Calendar, Users, DollarSign, XCircle, Clock, Bell, Search, Filter, ChevronLeft, ChevronRight, Settings, LogOut, Shield, Plus, Edit3, Trash2, Phone, Mail, AlertTriangle, CheckCircle, Send, Eye, ArrowLeft, Home, UserPlus, TrendingUp, X, Check, LayoutList, CalendarDays, RefreshCw, Star } from "lucide-react";
-
+import { createClient } from '@supabase/supabase-js';
 // ─── DATA ───
 const PATIENTS = [
   { id:"p1",name:"García, Ana",phone:"11-4521-8832",fee:8500,freq:"semanal",day:1,hour:"10:00",active:true,token:"tok1",tutor:"",duracion:null,notes:"" },

@@ -1,6 +1,10 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { Calendar, Users, DollarSign, XCircle, Clock, Bell, Search, Filter, ChevronLeft, ChevronRight, Settings, LogOut, Shield, Plus, Edit3, Trash2, Phone, Mail, AlertTriangle, CheckCircle, Send, Eye, ArrowLeft, Home, UserPlus, TrendingUp, X, Check, LayoutList, CalendarDays, RefreshCw, Star } from "lucide-react";
 import { createClient } from '@supabase/supabase-js';
+// ─── SUPABASE CLIENT ───
+const supabaseUrl = 'https://hszobstcatbyzijbdnpv.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhzem9ic3RjYXRieXppamJkbnB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MzY0NDQsImV4cCI6MjA4OTAxMjQ0NH0.Jl0KNbT40lS3ybc8sPPfZVkhnPdTZPNXXpG9xlP5Ybc';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // ─── DATA ───
 const PATIENTS = [
   { id:"p1",name:"García, Ana",phone:"11-4521-8832",fee:8500,freq:"semanal",day:1,hour:"10:00",active:true,token:"tok1",tutor:"",duracion:null,notes:"" },

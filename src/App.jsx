@@ -1,21 +1,12 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { Calendar, Users, DollarSign, XCircle, Clock, Bell, Search, Filter, ChevronLeft, ChevronRight, Settings, LogOut, Shield, Plus, Edit3, Trash2, Phone, Mail, AlertTriangle, CheckCircle, Send, Eye, ArrowLeft, Home, UserPlus, TrendingUp, X, Check, LayoutList, CalendarDays, RefreshCw, Star } from "lucide-react";
 import { createClient } from '@supabase/supabase-js';
+
 // ─── SUPABASE CLIENT ───
 const supabaseUrl = 'https://hszobstcatbyzijbdnpv.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhzem9ic3RjYXRieXppamJkbnB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MzY0NDQsImV4cCI6MjA4OTAxMjQ0NH0.Jl0KNbT40lS3ybc8sPPfZVkhnPdTZPNXXpG9xlP5Ybc';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-// ─── DATA ───
-const PATIENTS = [
-  { id:"p1",name:"García, Ana",phone:"11-4521-8832",fee:8500,freq:"semanal",day:1,hour:"10:00",active:true,token:"tok1",tutor:"",duracion:null,notes:"" },
-  { id:"p2",name:"López, María",phone:"11-5598-4430",fee:7500,freq:"semanal",day:2,hour:"14:00",active:true,token:"tok2",tutor:"",duracion:null,notes:"" },
-  { id:"p3",name:"Martínez, Laura",phone:"11-2234-6678",fee:8500,freq:"semanal",day:5,hour:"09:00",active:true,token:"tok3",tutor:"",duracion:null,notes:"" },
-  { id:"p4",name:"Pérez, Carlos",phone:"11-3345-7721",fee:9000,freq:"quincenal",day:3,hour:"11:00",active:true,token:"tok4",tutor:"",duracion:null,notes:"" },
-  { id:"p5",name:"Ruiz, Roberto",phone:"11-7712-9923",fee:10000,freq:"mensual",day:4,hour:"16:00",active:true,token:"tok5",tutor:"",duracion:null,notes:"" },
-  { id:"p6",name:"Sánchez, Diego",phone:"11-8891-3344",fee:9500,freq:"quincenal",day:2,hour:"18:00",active:true,token:"tok6",tutor:"",duracion:null,notes:"" },
-  { id:"p7",name:"Torres, Valentina",phone:"11-6655-2211",fee:8000,freq:"semanal",day:4,hour:"10:00",active:true,token:"tok7",tutor:"Juan Torres (padre)",duracion:60,notes:"Paciente menor" },
-  { id:"p8",name:"Vidal, Sofía",phone:"11-1199-8877",fee:11000,freq:"semanal",day:1,hour:"16:00",active:true,token:"tok8",tutor:"",duracion:null,notes:"" },
-];
+
 
 const FREQ_L = { semanal:"Semanal",quincenal:"Quincenal",mensual:"Mensual",bimestral:"Bimestral",trimestral:"Trimestral" };
 const FREQ_C = { semanal:"#0891b2",quincenal:"#7c3aed",mensual:"#d97706",bimestral:"#059669",trimestral:"#dc2626" };
@@ -23,21 +14,6 @@ const DAYS = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 const DAYS_FULL = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
 const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-function genAppts(patients, year, month) {
-  const a = []; const dim = new Date(year, month+1, 0).getDate();
-  patients.filter(p=>p.active).forEach(p => {
-    for (let d=1; d<=dim; d++) {
-      const dt = new Date(year, month, d);
-      if (dt.getDay() === p.day) {
-        const wk = Math.ceil(d/7);
-        if (p.freq==="mensual" && wk!==1) continue;
-        if (p.freq==="quincenal" && wk%2!==0) continue;
-        a.push({ id:`${p.id}-${year}-${month}-${d}`, pid:p.id, pname:p.name, date:dt, hora:p.hour, fee:p.fee, freq:p.freq, estado:"confirmado" });
-      }
-    }
-  });
-  return a;
-}
 
 // ─── STYLES ───
 const theme = {
@@ -113,16 +89,247 @@ function StatCard({ icon:Icon, label, value, color, onClick }) {
 // ═══════════════════════════════════════════════
 export default function App() {
   const [screen, setScreen] = useState("landing");
+  const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [professionalId, setProfessionalId] = useState(null);
   const [loginRole, setLoginRole] = useState("professional");
   const [toast, setToast] = useState(null);
   const [push, setPush] = useState(null);
   const [patientPortalId, setPatientPortalId] = useState(null);
-  const [patients, setPatients] = useState(PATIENTS);
-  const now = new Date();
-  const [appts, setAppts] = useState(() => genAppts(PATIENTS, now.getFullYear(), now.getMonth()));
+  const [patients, setPatients] = useState([]);
+  const [appts, setAppts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const notify = useCallback((msg, type="success") => { setToast({msg,type}); setTimeout(()=>setToast(null),3000); }, []);
   const pushNotify = useCallback((title, body) => { setPush({title,body}); setTimeout(()=>setPush(null),5000); }, []);
+
+  // Check session on mount
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setUser(session.user);
+        checkUserRole(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        checkUserRole(session.user.id);
+      } else {
+        setUserRole(null);
+        setProfessionalId(null);
+        setScreen('landing');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const checkUserRole = async (userId) => {
+    try {
+      const { data: adminData } = await supabase
+        .from('super_admin')
+        .select('user_id')
+        .eq('user_id', userId)
+        .single();
+
+      if (adminData) {
+        setUserRole('admin');
+        setScreen('admin');
+        return;
+      }
+
+      const { data: profData } = await supabase
+        .from('profesionales')
+        .select('id, user_id')
+        .eq('user_id', userId)
+        .single();
+
+      if (profData) {
+        setUserRole('professional');
+        setProfessionalId(profData.id);
+        setScreen('professional');
+        loadProfessionalData(profData.id);
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking role:', error);
+    }
+  };
+
+  const loadProfessionalData = async (profId) => {
+    setLoading(true);
+    try {
+      const { data: patientsData, error: patientsError } = await supabase
+        .from('pacientes')
+        .select('*')
+        .eq('profesional_id', profId)
+        .order('apellido', { ascending: true });
+
+      if (patientsError) throw patientsError;
+
+      const transformedPatients = (patientsData || []).map(p => ({
+        id: p.id,
+        name: `${p.apellido}, ${p.nombre}`,
+        phone: p.telefono,
+        fee: p.honorario,
+        freq: p.frecuencia,
+        day: p.dia_semana,
+        hour: p.hora_habitual,
+        active: p.activo,
+        token: p.push_token || '',
+        tutor: p.tutor || '',
+        duracion: p.duracion_sesion,
+        notes: p.notas_internas || ''
+      }));
+
+      setPatients(transformedPatients);
+
+      const now = new Date();
+      const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+      const endDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()}`;
+      
+      const { data: apptsData, error: apptsError } = await supabase
+        .from('turnos')
+        .select('*, pacientes(nombre, apellido)')
+        .eq('profesional_id', profId)
+        .gte('fecha_hora', startDate)
+        .lte('fecha_hora', endDate)
+        .order('fecha_hora', { ascending: true });
+
+      if (apptsError) throw apptsError;
+
+      const transformedAppts = (apptsData || []).map(a => ({
+        id: a.id,
+        pid: a.paciente_id,
+        pname: a.pacientes ? `${a.pacientes.apellido}, ${a.pacientes.nombre}` : 'Desconocido',
+        date: new Date(a.fecha_hora),
+        hora: a.fecha_hora.split('T')[1].substring(0, 5),
+        fee: a.honorario,
+        freq: a.frecuencia,
+        estado: a.estado
+      }));
+
+      setAppts(transformedAppts);
+    } catch (error) {
+      notify(`Error: ${error.message}`, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async (email, password) => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      notify('Sesión iniciada');
+    } catch (error) {
+      notify(error.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setScreen('landing');
+    setUserRole(null);
+    setProfessionalId(null);
+    setPatients([]);
+    setAppts([]);
+    notify('Sesión cerrada');
+  };
+
+  const handleAddPatient = async (patientData) => {
+    if (!professionalId) return;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('pacientes')
+        .insert([{
+          profesional_id: professionalId,
+          nombre: patientData.nombre,
+          apellido: patientData.apellido,
+          telefono: patientData.telefono,
+          honorario: patientData.honorario,
+          frecuencia: patientData.frecuencia,
+          dia_semana: patientData.dia_semana,
+          hora_habitual: patientData.hora_habitual,
+          activo: true,
+          tutor: patientData.tutor || null,
+          duracion_sesion: patientData.duracion_sesion || 50,
+          notas_internas: patientData.notas_internas || ''
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      await loadProfessionalData(professionalId);
+      notify('Paciente agregado');
+      return data;
+    } catch (error) {
+      notify(error.message, 'error');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditPatient = async (patientId, updates) => {
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('pacientes')
+        .update(updates)
+        .eq('id', patientId);
+
+      if (error) throw error;
+      await loadProfessionalData(professionalId);
+      notify('Paciente actualizado');
+    } catch (error) {
+      notify(error.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeletePatient = async (patientId) => {
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('pacientes')
+        .update({ activo: false })
+        .eq('id', patientId);
+
+      if (error) throw error;
+      await loadProfessionalData(professionalId);
+      notify('Paciente desactivado');
+    } catch (error) {
+      notify(error.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGenerateAppointments = async (patientId) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('generar_turnos_paciente', {
+        p_paciente_id: patientId,
+        p_meses_adelante: 3
+      });
+
+      if (error) throw error;
+      await loadProfessionalData(professionalId);
+      notify(`${data} turnos generados`);
+    } catch (error) {
+      notify(`Error: ${error.message}`, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const CSS = `@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
   * { box-sizing:border-box; margin:0; padding:0; }
@@ -142,8 +349,21 @@ export default function App() {
     <div style={{ fontFamily:"'DM Sans',system-ui,sans-serif",background:screen==="landing"||screen==="login"||screen==="admin"?"#0a0f1e":"#f8fafc",minHeight:"100vh",color:screen==="landing"||screen==="login"||screen==="admin"?"#f1f5f9":"#0f172a" }}>
       <style>{CSS}</style>
       {screen==="landing" && <Landing onLogin={(r)=>{setLoginRole(r);setScreen("login");}} />}
-      {screen==="login" && <Login role={loginRole} onSuccess={()=>setScreen(loginRole==="admin"?"admin":"professional")} onBack={()=>setScreen("landing")} />}
-      {screen==="professional" && <Professional appts={appts} setAppts={setAppts} patients={patients} setPatients={setPatients} notify={notify} pushNotify={pushNotify} onPatient={goPatient} onLogout={()=>setScreen("landing")} />}
+      {screen==="login" && <Login role={loginRole} onLogin={handleLogin} onBack={()=>setScreen("landing")} loading={loading} />}
+      {screen==="professional" && (
+        <Professional 
+          appts={appts}
+          patients={patients}
+          onLogout={handleLogout}
+          notify={notify}
+          pushNotify={pushNotify}
+          onAddPatient={handleAddPatient}
+          onEditPatient={handleEditPatient}
+          onDeletePatient={handleDeletePatient}
+          onGenerateAppointments={handleGenerateAppointments}
+          loading={loading}
+        />
+      )}
       {screen==="admin" && <Admin onLogout={()=>setScreen("landing")} notify={notify} />}
       {screen==="patient" && <Patient pid={patientPortalId} patients={patients} setPatients={setPatients} appts={appts} setAppts={setAppts} notify={notify} pushNotify={pushNotify} onBack={goBack} />}
       <Toast msg={toast?.msg} type={toast?.type} />
@@ -245,7 +465,7 @@ function Login({ role, onSuccess, onBack }) {
 // ═══════════════════════════════════════════════
 // PROFESSIONAL PANEL
 // ═══════════════════════════════════════════════
-function Professional({ appts, setAppts, patients, setPatients, notify, pushNotify, onPatient, onLogout }) {
+function Professional({ appts, patients, onLogout, notify, pushNotify, onAddPatient, onEditPatient, onDeletePatient, onGenerateAppointments, loading }) {
   const [tab, setTab] = useState("hoy");
   const [selDay, setSelDay] = useState(new Date());
   const [search, setSearch] = useState("");

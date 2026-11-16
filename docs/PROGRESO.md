@@ -28,7 +28,7 @@ PR abierto: #2 https://github.com/Consciousnessebooks/turnapp/pull/2 (Fase 0)
 Esperar el merge de #2. La Fase 1a (hotfix) está lista en la rama local `fase-1a-hotfix-local` (commit cb3c62d) y se sube a `claude/stoic-ride-yk4por` cuando se mergee la Fase 0 (el entorno no permite pushear otra rama).
 ## Esperando a Martín
 - M-14 variante A (proteger `main` con un ruleset)
-- M-03: pasos de seguridad pendientes (detalle en el chat)
+- M-03: secreto JWT legacy REVOCADO (captura de Martín, 2026-11-16: HS256 en "Revoked keys", clave actual ECC P-256). Quedan los demás pasos de seguridad (detalle en el chat)
 - Confirmar si las cuentas y los 5 pacientes son de prueba (detalle en el chat)
 - Decisiones: "Reconstruir" o "Adoptar"; nombre de dominio
 ## Decisiones pendientes de Martín

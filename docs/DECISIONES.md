@@ -71,6 +71,9 @@ Martín sube el kit a `main` antes de la primera sesión (guía). Por eso `CLAUD
 ## Registro de decisiones nuevas (Claude Code)
 _(agregá acá, la más nueva arriba)_
 
+### N-08 · 2026-11-16 · M-03: secreto JWT legacy revocado (captura de Martín)
+Captura de "Project Settings" → "JWT Keys" → pestaña "JWT Signing Keys": clave "Current" ECC (P-256); "Previously used keys" vacío; en "Revoked keys" la HS256 (Shared Secret), rotada "7 hours ago" al 2026-11-16. Los JWT legacy (anon y service_role) ya no se aceptan. Corrección al pedido: el botón "Migrate JWT secret" no aparece cuando la migración ya está hecha (https://supabase.com/docs/guides/auth/signing-keys, leído 2026-11-16).
+
 ### N-07 · 2026-11-16 · Fixture de producción: ubicación y EXECUTE de funciones
 - Se mantiene en `supabase/tests/fixtures/` (lo pide §5.4). NO VERIFICADO si `npx supabase test db` toma `.sql` de subcarpetas de `supabase/tests/`: se comprueba al empezar la Fase 2; si los toma, se mueve a `supabase/fixtures/` (observación de auditor-seguridad).
 - El fixture revoca grants de tablas y privilegios por defecto (producción no tiene), pero deja EXECUTE de funciones para PUBLIC porque así está en producción (arquitecto-supabase). auditor-seguridad proponía revocarlo; se prioriza que la réplica sea fiel. Se corrige en la reconstrucción.

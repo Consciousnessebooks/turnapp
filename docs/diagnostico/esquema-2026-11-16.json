@@ -1,0 +1,1932 @@
+{
+ "enums": [],
+ "tablas": [
+  {
+   "rls": true,
+   "tabla": "admin_log",
+   "filas_aprox": -1,
+   "rls_forzado": false
+  },
+  {
+   "rls": true,
+   "tabla": "bloqueos",
+   "filas_aprox": -1,
+   "rls_forzado": false
+  },
+  {
+   "rls": true,
+   "tabla": "codigos_referido",
+   "filas_aprox": -1,
+   "rls_forzado": false
+  },
+  {
+   "rls": false,
+   "tabla": "configuracion_push",
+   "filas_aprox": -1,
+   "rls_forzado": false
+  },
+  {
+   "rls": true,
+   "tabla": "lista_espera",
+   "filas_aprox": -1,
+   "rls_forzado": false
+  },
+  {
+   "rls": true,
+   "tabla": "pacientes",
+   "filas_aprox": -1,
+   "rls_forzado": false
+  },
+  {
+   "rls": true,
+   "tabla": "pagos",
+   "filas_aprox": -1,
+   "rls_forzado": false
+  },
+  {
+   "rls": true,
+   "tabla": "profesionales",
+   "filas_aprox": -1,
+   "rls_forzado": false
+  },
+  {
+   "rls": true,
+   "tabla": "push_log",
+   "filas_aprox": -1,
+   "rls_forzado": false
+  },
+  {
+   "rls": false,
+   "tabla": "super_admin",
+   "filas_aprox": -1,
+   "rls_forzado": false
+  },
+  {
+   "rls": true,
+   "tabla": "turnos",
+   "filas_aprox": -1,
+   "rls_forzado": false
+  }
+ ],
+ "vistas": [
+  {
+   "nombre": "v_admin_dashboard",
+   "opciones": null,
+   "definicion": " SELECT ( SELECT count(*) AS count\n           FROM profesionales\n          WHERE profesionales.activo = true) AS prof_activos,\n    ( SELECT count(*) AS count\n           FROM profesionales) AS prof_total,\n    ( SELECT count(*) AS count\n           FROM pacientes\n          WHERE pacientes.activo = true) AS pac_total,\n    ( SELECT count(*) AS count\n           FROM turnos\n          WHERE turnos.fecha >= date_trunc('month'::text, CURRENT_DATE::timestamp with time zone) AND turnos.estado !~~ 'cancelado%'::text) AS turnos_mes,\n    ( SELECT COALESCE(sum(pagos.monto), 0::numeric) AS \"coalesce\"\n           FROM pagos\n          WHERE pagos.estado = 'pagado'::text AND pagos.periodo_inicio >= date_trunc('month'::text, CURRENT_DATE::timestamp with time zone)) AS ingreso_mes;"
+  },
+  {
+   "nombre": "v_turnos_hoy",
+   "opciones": null,
+   "definicion": " SELECT t.id,\n    t.fecha,\n    t.hora_inicio,\n    t.hora_fin,\n    t.estado,\n    t.honorario,\n    p.id AS paciente_id,\n    (p.nombre || ' '::text) || p.apellido AS paciente_nombre,\n    p.frecuencia,\n    p.telefono,\n    t.profesional_id\n   FROM turnos t\n     JOIN pacientes p ON p.id = t.paciente_id\n  WHERE t.fecha = CURRENT_DATE\n  ORDER BY t.hora_inicio;"
+  }
+ ],
+ "indices": [
+  {
+   "tabla": "admin_log",
+   "definicion": "CREATE UNIQUE INDEX admin_log_pkey ON public.admin_log USING btree (id)"
+  },
+  {
+   "tabla": "admin_log",
+   "definicion": "CREATE INDEX idx_admin_log_fecha ON public.admin_log USING btree (created_at)"
+  },
+  {
+   "tabla": "bloqueos",
+   "definicion": "CREATE UNIQUE INDEX bloqueos_pkey ON public.bloqueos USING btree (id)"
+  },
+  {
+   "tabla": "bloqueos",
+   "definicion": "CREATE INDEX idx_bloq_prof_fecha ON public.bloqueos USING btree (profesional_id, fecha)"
+  },
+  {
+   "tabla": "codigos_referido",
+   "definicion": "CREATE UNIQUE INDEX codigos_referido_codigo_key ON public.codigos_referido USING btree (codigo)"
+  },
+  {
+   "tabla": "codigos_referido",
+   "definicion": "CREATE UNIQUE INDEX codigos_referido_pkey ON public.codigos_referido USING btree (id)"
+  },
+  {
+   "tabla": "configuracion_push",
+   "definicion": "CREATE UNIQUE INDEX configuracion_push_pkey ON public.configuracion_push USING btree (id)"
+  },
+  {
+   "tabla": "lista_espera",
+   "definicion": "CREATE UNIQUE INDEX lista_espera_pkey ON public.lista_espera USING btree (id)"
+  },
+  {
+   "tabla": "pacientes",
+   "definicion": "CREATE INDEX idx_pac_apellido ON public.pacientes USING btree (profesional_id, apellido, nombre)"
+  },
+  {
+   "tabla": "pacientes",
+   "definicion": "CREATE INDEX idx_pac_prof ON public.pacientes USING btree (profesional_id)"
+  },
+  {
+   "tabla": "pacientes",
+   "definicion": "CREATE INDEX idx_pac_token ON public.pacientes USING btree (token_acceso)"
+  },
+  {
+   "tabla": "pacientes",
+   "definicion": "CREATE UNIQUE INDEX pacientes_pkey ON public.pacientes USING btree (id)"
+  },
+  {
+   "tabla": "pacientes",
+   "definicion": "CREATE UNIQUE INDEX pacientes_token_acceso_key ON public.pacientes USING btree (token_acceso)"
+  },
+  {
+   "tabla": "pagos",
+   "definicion": "CREATE UNIQUE INDEX pagos_pkey ON public.pagos USING btree (id)"
+  },
+  {
+   "tabla": "profesionales",
+   "definicion": "CREATE INDEX idx_prof_referido ON public.profesionales USING btree (codigo_referido)"
+  },
+  {
+   "tabla": "profesionales",
+   "definicion": "CREATE INDEX idx_prof_user ON public.profesionales USING btree (user_id)"
+  },
+  {
+   "tabla": "profesionales",
+   "definicion": "CREATE UNIQUE INDEX profesionales_codigo_referido_key ON public.profesionales USING btree (codigo_referido)"
+  },
+  {
+   "tabla": "profesionales",
+   "definicion": "CREATE UNIQUE INDEX profesionales_email_key ON public.profesionales USING btree (email)"
+  },
+  {
+   "tabla": "profesionales",
+   "definicion": "CREATE UNIQUE INDEX profesionales_pkey ON public.profesionales USING btree (id)"
+  },
+  {
+   "tabla": "profesionales",
+   "definicion": "CREATE UNIQUE INDEX profesionales_user_id_key ON public.profesionales USING btree (user_id)"
+  },
+  {
+   "tabla": "push_log",
+   "definicion": "CREATE INDEX idx_push_prof ON public.push_log USING btree (profesional_id)"
+  },
+  {
+   "tabla": "push_log",
+   "definicion": "CREATE UNIQUE INDEX push_log_pkey ON public.push_log USING btree (id)"
+  },
+  {
+   "tabla": "super_admin",
+   "definicion": "CREATE UNIQUE INDEX super_admin_email_key ON public.super_admin USING btree (email)"
+  },
+  {
+   "tabla": "super_admin",
+   "definicion": "CREATE UNIQUE INDEX super_admin_pkey ON public.super_admin USING btree (id)"
+  },
+  {
+   "tabla": "super_admin",
+   "definicion": "CREATE UNIQUE INDEX super_admin_user_id_key ON public.super_admin USING btree (user_id)"
+  },
+  {
+   "tabla": "turnos",
+   "definicion": "CREATE INDEX idx_turno_pac ON public.turnos USING btree (paciente_id)"
+  },
+  {
+   "tabla": "turnos",
+   "definicion": "CREATE INDEX idx_turno_prof_fecha ON public.turnos USING btree (profesional_id, fecha)"
+  },
+  {
+   "tabla": "turnos",
+   "definicion": "CREATE UNIQUE INDEX idx_turno_slot ON public.turnos USING btree (profesional_id, fecha, hora_inicio) WHERE (estado <> ALL (ARRAY['cancelado_paciente'::text, 'cancelado_profesional'::text]))"
+  },
+  {
+   "tabla": "turnos",
+   "definicion": "CREATE UNIQUE INDEX turnos_pkey ON public.turnos USING btree (id)"
+  }
+ ],
+ "columnas": [
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "admin_log",
+   "columna": "id",
+   "default": "extensions.uuid_generate_v4()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "YES",
+   "tipo": "uuid",
+   "tabla": "admin_log",
+   "columna": "admin_id",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "admin_log",
+   "columna": "accion",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "admin_log",
+   "columna": "entidad",
+   "default": null
+  },
+  {
+   "udt": "uuid",
+   "nulo": "YES",
+   "tipo": "uuid",
+   "tabla": "admin_log",
+   "columna": "entidad_id",
+   "default": null
+  },
+  {
+   "udt": "jsonb",
+   "nulo": "YES",
+   "tipo": "jsonb",
+   "tabla": "admin_log",
+   "columna": "detalle",
+   "default": null
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "admin_log",
+   "columna": "created_at",
+   "default": "now()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "bloqueos",
+   "columna": "id",
+   "default": "extensions.uuid_generate_v4()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "bloqueos",
+   "columna": "profesional_id",
+   "default": null
+  },
+  {
+   "udt": "date",
+   "nulo": "NO",
+   "tipo": "date",
+   "tabla": "bloqueos",
+   "columna": "fecha",
+   "default": null
+  },
+  {
+   "udt": "time",
+   "nulo": "YES",
+   "tipo": "time without time zone",
+   "tabla": "bloqueos",
+   "columna": "hora_inicio",
+   "default": null
+  },
+  {
+   "udt": "time",
+   "nulo": "YES",
+   "tipo": "time without time zone",
+   "tabla": "bloqueos",
+   "columna": "hora_fin",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "bloqueos",
+   "columna": "motivo",
+   "default": null
+  },
+  {
+   "udt": "bool",
+   "nulo": "YES",
+   "tipo": "boolean",
+   "tabla": "bloqueos",
+   "columna": "pacientes_notificados",
+   "default": "false"
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "bloqueos",
+   "columna": "created_at",
+   "default": "now()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "codigos_referido",
+   "columna": "id",
+   "default": "extensions.uuid_generate_v4()"
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "codigos_referido",
+   "columna": "codigo",
+   "default": null
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "codigos_referido",
+   "columna": "profesional_id",
+   "default": null
+  },
+  {
+   "udt": "numeric",
+   "nulo": "YES",
+   "tipo": "numeric",
+   "tabla": "codigos_referido",
+   "columna": "descuento_porcentaje",
+   "default": "75.00"
+  },
+  {
+   "udt": "int4",
+   "nulo": "YES",
+   "tipo": "integer",
+   "tabla": "codigos_referido",
+   "columna": "usos",
+   "default": "0"
+  },
+  {
+   "udt": "int4",
+   "nulo": "YES",
+   "tipo": "integer",
+   "tabla": "codigos_referido",
+   "columna": "usos_maximo",
+   "default": "10"
+  },
+  {
+   "udt": "bool",
+   "nulo": "YES",
+   "tipo": "boolean",
+   "tabla": "codigos_referido",
+   "columna": "activo",
+   "default": "true"
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "codigos_referido",
+   "columna": "created_at",
+   "default": "now()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "configuracion_push",
+   "columna": "id",
+   "default": "extensions.uuid_generate_v4()"
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "configuracion_push",
+   "columna": "vapid_public_key",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "configuracion_push",
+   "columna": "vapid_private_key",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "configuracion_push",
+   "columna": "vapid_subject",
+   "default": "'mailto:admin@turnapp.com'::text"
+  },
+  {
+   "udt": "bool",
+   "nulo": "YES",
+   "tipo": "boolean",
+   "tabla": "configuracion_push",
+   "columna": "activo",
+   "default": "true"
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "configuracion_push",
+   "columna": "created_at",
+   "default": "now()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "lista_espera",
+   "columna": "id",
+   "default": "extensions.uuid_generate_v4()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "lista_espera",
+   "columna": "profesional_id",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "lista_espera",
+   "columna": "nombre",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "lista_espera",
+   "columna": "telefono",
+   "default": null
+  },
+  {
+   "udt": "int4",
+   "nulo": "YES",
+   "tipo": "integer",
+   "tabla": "lista_espera",
+   "columna": "dia_preferido",
+   "default": null
+  },
+  {
+   "udt": "time",
+   "nulo": "YES",
+   "tipo": "time without time zone",
+   "tabla": "lista_espera",
+   "columna": "hora_preferida",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "lista_espera",
+   "columna": "notas",
+   "default": null
+  },
+  {
+   "udt": "bool",
+   "nulo": "YES",
+   "tipo": "boolean",
+   "tabla": "lista_espera",
+   "columna": "atendido",
+   "default": "false"
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "lista_espera",
+   "columna": "created_at",
+   "default": "now()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "pacientes",
+   "columna": "id",
+   "default": "extensions.uuid_generate_v4()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "pacientes",
+   "columna": "profesional_id",
+   "default": null
+  },
+  {
+   "udt": "int4",
+   "nulo": "NO",
+   "tipo": "integer",
+   "tabla": "pacientes",
+   "columna": "numero",
+   "default": "nextval('pacientes_numero_seq'::regclass)"
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "pacientes",
+   "columna": "nombre",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "pacientes",
+   "columna": "apellido",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "pacientes",
+   "columna": "telefono",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "pacientes",
+   "columna": "email",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "pacientes",
+   "columna": "nombre_tutor",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "pacientes",
+   "columna": "telefono_tutor",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "pacientes",
+   "columna": "token_acceso",
+   "default": "encode(extensions.gen_random_bytes(16), 'hex'::text)"
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "pacientes",
+   "columna": "frecuencia",
+   "default": null
+  },
+  {
+   "udt": "int4",
+   "nulo": "NO",
+   "tipo": "integer",
+   "tabla": "pacientes",
+   "columna": "dia_semana",
+   "default": null
+  },
+  {
+   "udt": "time",
+   "nulo": "NO",
+   "tipo": "time without time zone",
+   "tabla": "pacientes",
+   "columna": "hora_turno",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "pacientes",
+   "columna": "semana_paridad",
+   "default": null
+  },
+  {
+   "udt": "numeric",
+   "nulo": "NO",
+   "tipo": "numeric",
+   "tabla": "pacientes",
+   "columna": "honorario",
+   "default": "15000.00"
+  },
+  {
+   "udt": "int4",
+   "nulo": "YES",
+   "tipo": "integer",
+   "tabla": "pacientes",
+   "columna": "duracion_sesion",
+   "default": null
+  },
+  {
+   "udt": "jsonb",
+   "nulo": "YES",
+   "tipo": "jsonb",
+   "tabla": "pacientes",
+   "columna": "push_subscription",
+   "default": null
+  },
+  {
+   "udt": "bool",
+   "nulo": "YES",
+   "tipo": "boolean",
+   "tabla": "pacientes",
+   "columna": "push_enabled",
+   "default": "false"
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "pacientes",
+   "columna": "notas_internas",
+   "default": null
+  },
+  {
+   "udt": "bool",
+   "nulo": "YES",
+   "tipo": "boolean",
+   "tabla": "pacientes",
+   "columna": "activo",
+   "default": "true"
+  },
+  {
+   "udt": "date",
+   "nulo": "YES",
+   "tipo": "date",
+   "tabla": "pacientes",
+   "columna": "fecha_alta",
+   "default": "CURRENT_DATE"
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "pacientes",
+   "columna": "created_at",
+   "default": "now()"
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "pacientes",
+   "columna": "updated_at",
+   "default": "now()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "pagos",
+   "columna": "id",
+   "default": "extensions.uuid_generate_v4()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "pagos",
+   "columna": "profesional_id",
+   "default": null
+  },
+  {
+   "udt": "numeric",
+   "nulo": "NO",
+   "tipo": "numeric",
+   "tabla": "pagos",
+   "columna": "monto",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "pagos",
+   "columna": "moneda",
+   "default": "'ARS'::text"
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "pagos",
+   "columna": "concepto",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "pagos",
+   "columna": "metodo",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "pagos",
+   "columna": "estado",
+   "default": "'pendiente'::text"
+  },
+  {
+   "udt": "numeric",
+   "nulo": "YES",
+   "tipo": "numeric",
+   "tabla": "pagos",
+   "columna": "descuento_referido",
+   "default": "0"
+  },
+  {
+   "udt": "date",
+   "nulo": "YES",
+   "tipo": "date",
+   "tabla": "pagos",
+   "columna": "periodo_inicio",
+   "default": null
+  },
+  {
+   "udt": "date",
+   "nulo": "YES",
+   "tipo": "date",
+   "tabla": "pagos",
+   "columna": "periodo_fin",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "pagos",
+   "columna": "referencia_pago",
+   "default": null
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "pagos",
+   "columna": "created_at",
+   "default": "now()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "profesionales",
+   "columna": "id",
+   "default": "extensions.uuid_generate_v4()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "YES",
+   "tipo": "uuid",
+   "tabla": "profesionales",
+   "columna": "user_id",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "nombre",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "apellido",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "especialidad",
+   "default": "'Psicología'::text"
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "email",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "telefono",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "matricula",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "nombre_consultorio",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "direccion",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "link_videollamada",
+   "default": null
+  },
+  {
+   "udt": "_int4",
+   "nulo": "YES",
+   "tipo": "ARRAY",
+   "tabla": "profesionales",
+   "columna": "dias_laborales",
+   "default": "ARRAY[1, 2, 3, 4, 5]"
+  },
+  {
+   "udt": "time",
+   "nulo": "YES",
+   "tipo": "time without time zone",
+   "tabla": "profesionales",
+   "columna": "horario_inicio",
+   "default": "'08:00:00'::time without time zone"
+  },
+  {
+   "udt": "time",
+   "nulo": "YES",
+   "tipo": "time without time zone",
+   "tabla": "profesionales",
+   "columna": "horario_fin",
+   "default": "'18:00:00'::time without time zone"
+  },
+  {
+   "udt": "int4",
+   "nulo": "YES",
+   "tipo": "integer",
+   "tabla": "profesionales",
+   "columna": "duracion_sesion_default",
+   "default": "50"
+  },
+  {
+   "udt": "numeric",
+   "nulo": "YES",
+   "tipo": "numeric",
+   "tabla": "profesionales",
+   "columna": "honorario_base",
+   "default": "15000.00"
+  },
+  {
+   "udt": "int4",
+   "nulo": "YES",
+   "tipo": "integer",
+   "tabla": "profesionales",
+   "columna": "minutos_pre_sesion",
+   "default": "30"
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "plan",
+   "default": "'starter'::text"
+  },
+  {
+   "udt": "int4",
+   "nulo": "YES",
+   "tipo": "integer",
+   "tabla": "profesionales",
+   "columna": "max_pacientes",
+   "default": "15"
+  },
+  {
+   "udt": "date",
+   "nulo": "YES",
+   "tipo": "date",
+   "tabla": "profesionales",
+   "columna": "plan_inicio",
+   "default": "CURRENT_DATE"
+  },
+  {
+   "udt": "date",
+   "nulo": "YES",
+   "tipo": "date",
+   "tabla": "profesionales",
+   "columna": "plan_vencimiento",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "codigo_referido",
+   "default": null
+  },
+  {
+   "udt": "uuid",
+   "nulo": "YES",
+   "tipo": "uuid",
+   "tabla": "profesionales",
+   "columna": "referido_por",
+   "default": null
+  },
+  {
+   "udt": "bool",
+   "nulo": "YES",
+   "tipo": "boolean",
+   "tabla": "profesionales",
+   "columna": "activo",
+   "default": "false"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "YES",
+   "tipo": "uuid",
+   "tabla": "profesionales",
+   "columna": "habilitado_por",
+   "default": null
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "profesionales",
+   "columna": "fecha_habilitacion",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "motivo_activacion",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "motivo_suspension",
+   "default": null
+  },
+  {
+   "udt": "bool",
+   "nulo": "YES",
+   "tipo": "boolean",
+   "tabla": "profesionales",
+   "columna": "onboarding_completado",
+   "default": "false"
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "profesionales",
+   "columna": "zona_horaria",
+   "default": "'America/Argentina/Buenos_Aires'::text"
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "profesionales",
+   "columna": "created_at",
+   "default": "now()"
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "profesionales",
+   "columna": "updated_at",
+   "default": "now()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "push_log",
+   "columna": "id",
+   "default": "extensions.uuid_generate_v4()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "YES",
+   "tipo": "uuid",
+   "tabla": "push_log",
+   "columna": "profesional_id",
+   "default": null
+  },
+  {
+   "udt": "uuid",
+   "nulo": "YES",
+   "tipo": "uuid",
+   "tabla": "push_log",
+   "columna": "paciente_id",
+   "default": null
+  },
+  {
+   "udt": "uuid",
+   "nulo": "YES",
+   "tipo": "uuid",
+   "tabla": "push_log",
+   "columna": "turno_id",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "push_log",
+   "columna": "tipo",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "push_log",
+   "columna": "titulo",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "push_log",
+   "columna": "cuerpo",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "push_log",
+   "columna": "estado",
+   "default": "'enviado'::text"
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "push_log",
+   "columna": "created_at",
+   "default": "now()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "super_admin",
+   "columna": "id",
+   "default": "extensions.uuid_generate_v4()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "super_admin",
+   "columna": "user_id",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "super_admin",
+   "columna": "nombre",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "NO",
+   "tipo": "text",
+   "tabla": "super_admin",
+   "columna": "email",
+   "default": null
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "super_admin",
+   "columna": "created_at",
+   "default": "now()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "turnos",
+   "columna": "id",
+   "default": "extensions.uuid_generate_v4()"
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "turnos",
+   "columna": "profesional_id",
+   "default": null
+  },
+  {
+   "udt": "uuid",
+   "nulo": "NO",
+   "tipo": "uuid",
+   "tabla": "turnos",
+   "columna": "paciente_id",
+   "default": null
+  },
+  {
+   "udt": "date",
+   "nulo": "NO",
+   "tipo": "date",
+   "tabla": "turnos",
+   "columna": "fecha",
+   "default": null
+  },
+  {
+   "udt": "time",
+   "nulo": "NO",
+   "tipo": "time without time zone",
+   "tabla": "turnos",
+   "columna": "hora_inicio",
+   "default": null
+  },
+  {
+   "udt": "time",
+   "nulo": "NO",
+   "tipo": "time without time zone",
+   "tabla": "turnos",
+   "columna": "hora_fin",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "turnos",
+   "columna": "estado",
+   "default": "'confirmado'::text"
+  },
+  {
+   "udt": "numeric",
+   "nulo": "NO",
+   "tipo": "numeric",
+   "tabla": "turnos",
+   "columna": "honorario",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "turnos",
+   "columna": "motivo_cancelacion",
+   "default": null
+  },
+  {
+   "udt": "bool",
+   "nulo": "YES",
+   "tipo": "boolean",
+   "tabla": "turnos",
+   "columna": "asistio",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "turnos",
+   "columna": "nota_sesion",
+   "default": null
+  },
+  {
+   "udt": "bool",
+   "nulo": "YES",
+   "tipo": "boolean",
+   "tabla": "turnos",
+   "columna": "push_recordatorio_enviado",
+   "default": "false"
+  },
+  {
+   "udt": "bool",
+   "nulo": "YES",
+   "tipo": "boolean",
+   "tabla": "turnos",
+   "columna": "push_pre_sesion_enviado",
+   "default": "false"
+  },
+  {
+   "udt": "bool",
+   "nulo": "YES",
+   "tipo": "boolean",
+   "tabla": "turnos",
+   "columna": "cancelacion_tardia",
+   "default": "false"
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "turnos",
+   "columna": "created_at",
+   "default": "now()"
+  },
+  {
+   "udt": "timestamptz",
+   "nulo": "YES",
+   "tipo": "timestamp with time zone",
+   "tabla": "turnos",
+   "columna": "updated_at",
+   "default": "now()"
+  },
+  {
+   "udt": "int8",
+   "nulo": "YES",
+   "tipo": "bigint",
+   "tabla": "v_admin_dashboard",
+   "columna": "prof_activos",
+   "default": null
+  },
+  {
+   "udt": "int8",
+   "nulo": "YES",
+   "tipo": "bigint",
+   "tabla": "v_admin_dashboard",
+   "columna": "prof_total",
+   "default": null
+  },
+  {
+   "udt": "int8",
+   "nulo": "YES",
+   "tipo": "bigint",
+   "tabla": "v_admin_dashboard",
+   "columna": "pac_total",
+   "default": null
+  },
+  {
+   "udt": "int8",
+   "nulo": "YES",
+   "tipo": "bigint",
+   "tabla": "v_admin_dashboard",
+   "columna": "turnos_mes",
+   "default": null
+  },
+  {
+   "udt": "numeric",
+   "nulo": "YES",
+   "tipo": "numeric",
+   "tabla": "v_admin_dashboard",
+   "columna": "ingreso_mes",
+   "default": null
+  },
+  {
+   "udt": "uuid",
+   "nulo": "YES",
+   "tipo": "uuid",
+   "tabla": "v_turnos_hoy",
+   "columna": "id",
+   "default": null
+  },
+  {
+   "udt": "date",
+   "nulo": "YES",
+   "tipo": "date",
+   "tabla": "v_turnos_hoy",
+   "columna": "fecha",
+   "default": null
+  },
+  {
+   "udt": "time",
+   "nulo": "YES",
+   "tipo": "time without time zone",
+   "tabla": "v_turnos_hoy",
+   "columna": "hora_inicio",
+   "default": null
+  },
+  {
+   "udt": "time",
+   "nulo": "YES",
+   "tipo": "time without time zone",
+   "tabla": "v_turnos_hoy",
+   "columna": "hora_fin",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "v_turnos_hoy",
+   "columna": "estado",
+   "default": null
+  },
+  {
+   "udt": "numeric",
+   "nulo": "YES",
+   "tipo": "numeric",
+   "tabla": "v_turnos_hoy",
+   "columna": "honorario",
+   "default": null
+  },
+  {
+   "udt": "uuid",
+   "nulo": "YES",
+   "tipo": "uuid",
+   "tabla": "v_turnos_hoy",
+   "columna": "paciente_id",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "v_turnos_hoy",
+   "columna": "paciente_nombre",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "v_turnos_hoy",
+   "columna": "frecuencia",
+   "default": null
+  },
+  {
+   "udt": "text",
+   "nulo": "YES",
+   "tipo": "text",
+   "tabla": "v_turnos_hoy",
+   "columna": "telefono",
+   "default": null
+  },
+  {
+   "udt": "uuid",
+   "nulo": "YES",
+   "tipo": "uuid",
+   "tabla": "v_turnos_hoy",
+   "columna": "profesional_id",
+   "default": null
+  }
+ ],
+ "generado": "2026-11-16T23:14:47.445526+00:00",
+ "triggers": [],
+ "funciones": [
+  {
+   "config": null,
+   "nombre": "cancelar_turno_paciente",
+   "argumentos": "p_turno_id uuid, p_token text, p_motivo text",
+   "definicion": "CREATE OR REPLACE FUNCTION public.cancelar_turno_paciente(p_turno_id uuid, p_token text, p_motivo text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n  v_turno RECORD;\r\nBEGIN\r\n  SELECT t.*, p.nombre || ' ' || p.apellido AS pnombre, p.token_acceso\r\n  INTO v_turno\r\n  FROM turnos t\r\n  JOIN pacientes p ON p.id = t.paciente_id\r\n  WHERE t.id = p_turno_id AND p.token_acceso = p_token;\r\n\r\n  IF NOT FOUND THEN\r\n    RETURN jsonb_build_object('ok', false, 'error', 'Acceso denegado');\r\n  END IF;\r\n\r\n  IF v_turno.estado LIKE 'cancelado%' THEN\r\n    RETURN jsonb_build_object('ok', false, 'error', 'Ya fue cancelado');\r\n  END IF;\r\n\r\n  UPDATE turnos\r\n  SET estado = 'cancelado_paciente',\r\n      motivo_cancelacion = COALESCE(p_motivo, 'Cancelado por paciente')\r\n  WHERE id = p_turno_id;\r\n\r\n  RETURN jsonb_build_object(\r\n    'ok', true,\r\n    'paciente', v_turno.pnombre,\r\n    'fecha', v_turno.fecha,\r\n    'hora', v_turno.hora_inicio\r\n  );\r\nEND;\r\n$function$\n",
+   "execute_anon": true,
+   "security_definer": false,
+   "execute_authenticated": true
+  },
+  {
+   "config": null,
+   "nombre": "fn_updated_at",
+   "argumentos": "",
+   "definicion": "CREATE OR REPLACE FUNCTION public.fn_updated_at()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nBEGIN\r\n  NEW.updated_at = NOW();\r\n  RETURN NEW;\r\nEND;\r\n$function$\n",
+   "execute_anon": true,
+   "security_definer": false,
+   "execute_authenticated": true
+  },
+  {
+   "config": null,
+   "nombre": "generar_turnos_paciente",
+   "argumentos": "p_paciente_id uuid, p_mes integer, p_anio integer",
+   "definicion": "CREATE OR REPLACE FUNCTION public.generar_turnos_paciente(p_paciente_id uuid, p_mes integer, p_anio integer)\n RETURNS integer\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n  v_pac RECORD;\r\n  v_prof RECORD;\r\n  v_fecha DATE;\r\n  v_fin DATE;\r\n  v_semana INTEGER;\r\n  v_incluir BOOLEAN;\r\n  v_count INTEGER := 0;\r\n  v_hora_fin TIME;\r\n  v_duracion INTEGER;\r\nBEGIN\r\n  SELECT * INTO v_pac FROM pacientes WHERE id = p_paciente_id AND activo = TRUE;\r\n  IF NOT FOUND THEN RETURN 0; END IF;\r\n\r\n  SELECT * INTO v_prof FROM profesionales WHERE id = v_pac.profesional_id;\r\n\r\n  v_duracion := COALESCE(v_pac.duracion_sesion, v_prof.duracion_sesion_default, 50);\r\n  v_hora_fin := v_pac.hora_turno + make_interval(mins => v_duracion);\r\n\r\n  v_fecha := make_date(p_anio, p_mes, 1);\r\n  v_fin := (v_fecha + INTERVAL '1 month' - INTERVAL '1 day')::DATE;\r\n\r\n  WHILE v_fecha <= v_fin LOOP\r\n    IF EXTRACT(ISODOW FROM v_fecha)::INTEGER = v_pac.dia_semana THEN\r\n      v_semana := CEIL(EXTRACT(DAY FROM v_fecha) / 7.0)::INTEGER;\r\n      v_incluir := TRUE;\r\n\r\n      IF v_pac.frecuencia = 'quincenal' THEN\r\n        IF v_pac.semana_paridad = 'par' THEN\r\n          v_incluir := (v_semana % 2 = 0);\r\n        ELSE\r\n          v_incluir := (v_semana % 2 = 1);\r\n        END IF;\r\n      ELSIF v_pac.frecuencia = 'mensual' THEN\r\n        v_incluir := (v_semana = 1);\r\n      ELSIF v_pac.frecuencia = 'bimestral' THEN\r\n        v_incluir := (v_semana = 1) AND (p_mes % 2 = 0);\r\n      ELSIF v_pac.frecuencia = 'trimestral' THEN\r\n        v_incluir := (v_semana = 1) AND (p_mes % 3 = 0);\r\n      END IF;\r\n\r\n      IF v_incluir THEN\r\n        IF NOT EXISTS (\r\n          SELECT 1 FROM bloqueos b\r\n          WHERE b.profesional_id = v_pac.profesional_id\r\n          AND b.fecha = v_fecha\r\n          AND (b.hora_inicio IS NULL OR (b.hora_inicio <= v_pac.hora_turno AND b.hora_fin > v_pac.hora_turno))\r\n        ) THEN\r\n          IF NOT EXISTS (\r\n            SELECT 1 FROM turnos t\r\n            WHERE t.paciente_id = p_paciente_id\r\n            AND t.fecha = v_fecha\r\n            AND t.hora_inicio = v_pac.hora_turno\r\n          ) THEN\r\n            INSERT INTO turnos (profesional_id, paciente_id, fecha, hora_inicio, hora_fin, estado, honorario)\r\n            VALUES (v_pac.profesional_id, p_paciente_id, v_fecha, v_pac.hora_turno, v_hora_fin, 'confirmado', v_pac.honorario);\r\n            v_count := v_count + 1;\r\n          END IF;\r\n        END IF;\r\n      END IF;\r\n    END IF;\r\n\r\n    v_fecha := v_fecha + INTERVAL '1 day';\r\n  END LOOP;\r\n\r\n  RETURN v_count;\r\nEND;\r\n$function$\n",
+   "execute_anon": true,
+   "security_definer": false,
+   "execute_authenticated": true
+  },
+  {
+   "config": null,
+   "nombre": "generar_turnos_profesional",
+   "argumentos": "p_prof_id uuid, p_mes integer, p_anio integer",
+   "definicion": "CREATE OR REPLACE FUNCTION public.generar_turnos_profesional(p_prof_id uuid, p_mes integer, p_anio integer)\n RETURNS TABLE(paciente_nombre text, turnos_creados integer)\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n  v_pac RECORD;\r\n  v_count INTEGER;\r\nBEGIN\r\n  FOR v_pac IN\r\n    SELECT id, nombre, apellido\r\n    FROM pacientes\r\n    WHERE profesional_id = p_prof_id AND activo = TRUE\r\n  LOOP\r\n    v_count := generar_turnos_paciente(v_pac.id, p_mes, p_anio);\r\n    IF v_count > 0 THEN\r\n      paciente_nombre := v_pac.nombre || ' ' || v_pac.apellido;\r\n      turnos_creados := v_count;\r\n      RETURN NEXT;\r\n    END IF;\r\n  END LOOP;\r\nEND;\r\n$function$\n",
+   "execute_anon": true,
+   "security_definer": false,
+   "execute_authenticated": true
+  },
+  {
+   "config": null,
+   "nombre": "resumen_mensual",
+   "argumentos": "p_pac_id uuid, p_mes integer, p_anio integer",
+   "definicion": "CREATE OR REPLACE FUNCTION public.resumen_mensual(p_pac_id uuid, p_mes integer, p_anio integer)\n RETURNS jsonb\n LANGUAGE plpgsql\nAS $function$\r\nDECLARE\r\n  v_pac RECORD;\r\n  v_turnos JSONB;\r\n  v_total NUMERIC;\r\n  v_cantidad INTEGER;\r\nBEGIN\r\n  SELECT * INTO v_pac FROM pacientes WHERE id = p_pac_id;\r\n\r\n  SELECT\r\n    jsonb_agg(\r\n      jsonb_build_object(\r\n        'fecha', t.fecha,\r\n        'hora', t.hora_inicio,\r\n        'dia', TO_CHAR(t.fecha, 'TMDay')\r\n      ) ORDER BY t.fecha\r\n    ),\r\n    COALESCE(SUM(t.honorario), 0),\r\n    COUNT(*)\r\n  INTO v_turnos, v_total, v_cantidad\r\n  FROM turnos t\r\n  WHERE t.paciente_id = p_pac_id\r\n    AND EXTRACT(MONTH FROM t.fecha) = p_mes\r\n    AND EXTRACT(YEAR FROM t.fecha) = p_anio\r\n    AND t.estado NOT LIKE 'cancelado%';\r\n\r\n  RETURN jsonb_build_object(\r\n    'paciente', v_pac.nombre || ' ' || v_pac.apellido,\r\n    'honorario_sesion', v_pac.honorario,\r\n    'total_mes', v_total,\r\n    'cantidad', v_cantidad,\r\n    'turnos', COALESCE(v_turnos, '[]'::jsonb)\r\n  );\r\nEND;\r\n$function$\n",
+   "execute_anon": true,
+   "security_definer": false,
+   "execute_authenticated": true
+  }
+ ],
+ "politicas": [
+  {
+   "roles": [
+    "public"
+   ],
+   "tabla": "bloqueos",
+   "using": "(profesional_id IN ( SELECT profesionales.id\n   FROM profesionales\n  WHERE (profesionales.user_id = auth.uid())))",
+   "nombre": "bloq_all",
+   "comando": "ALL",
+   "permisiva": "PERMISSIVE",
+   "with_check": null
+  },
+  {
+   "roles": [
+    "public"
+   ],
+   "tabla": "codigos_referido",
+   "using": "(profesional_id IN ( SELECT profesionales.id\n   FROM profesionales\n  WHERE (profesionales.user_id = auth.uid())))",
+   "nombre": "ref_all",
+   "comando": "ALL",
+   "permisiva": "PERMISSIVE",
+   "with_check": null
+  },
+  {
+   "roles": [
+    "public"
+   ],
+   "tabla": "lista_espera",
+   "using": "(profesional_id IN ( SELECT profesionales.id\n   FROM profesionales\n  WHERE (profesionales.user_id = auth.uid())))",
+   "nombre": "espera_all",
+   "comando": "ALL",
+   "permisiva": "PERMISSIVE",
+   "with_check": null
+  },
+  {
+   "roles": [
+    "public"
+   ],
+   "tabla": "pacientes",
+   "using": "(profesional_id IN ( SELECT profesionales.id\n   FROM profesionales\n  WHERE (profesionales.user_id = auth.uid())))",
+   "nombre": "pac_all",
+   "comando": "ALL",
+   "permisiva": "PERMISSIVE",
+   "with_check": null
+  },
+  {
+   "roles": [
+    "public"
+   ],
+   "tabla": "pagos",
+   "using": "(profesional_id IN ( SELECT profesionales.id\n   FROM profesionales\n  WHERE (profesionales.user_id = auth.uid())))",
+   "nombre": "pago_select",
+   "comando": "SELECT",
+   "permisiva": "PERMISSIVE",
+   "with_check": null
+  },
+  {
+   "roles": [
+    "public"
+   ],
+   "tabla": "profesionales",
+   "using": "(user_id = auth.uid())",
+   "nombre": "prof_select",
+   "comando": "SELECT",
+   "permisiva": "PERMISSIVE",
+   "with_check": null
+  },
+  {
+   "roles": [
+    "public"
+   ],
+   "tabla": "profesionales",
+   "using": "(user_id = auth.uid())",
+   "nombre": "prof_update",
+   "comando": "UPDATE",
+   "permisiva": "PERMISSIVE",
+   "with_check": null
+  },
+  {
+   "roles": [
+    "public"
+   ],
+   "tabla": "push_log",
+   "using": "(profesional_id IN ( SELECT profesionales.id\n   FROM profesionales\n  WHERE (profesionales.user_id = auth.uid())))",
+   "nombre": "push_all",
+   "comando": "ALL",
+   "permisiva": "PERMISSIVE",
+   "with_check": null
+  },
+  {
+   "roles": [
+    "public"
+   ],
+   "tabla": "turnos",
+   "using": "(profesional_id IN ( SELECT profesionales.id\n   FROM profesionales\n  WHERE (profesionales.user_id = auth.uid())))",
+   "nombre": "turno_all",
+   "comando": "ALL",
+   "permisiva": "PERMISSIVE",
+   "with_check": null
+  }
+ ],
+ "extensiones": [
+  {
+   "nombre": "pg_graphql",
+   "esquema": "graphql",
+   "version": "1.5.11"
+  },
+  {
+   "nombre": "pg_stat_statements",
+   "esquema": "extensions",
+   "version": "1.11"
+  },
+  {
+   "nombre": "pgcrypto",
+   "esquema": "extensions",
+   "version": "1.3"
+  },
+  {
+   "nombre": "plpgsql",
+   "esquema": "pg_catalog",
+   "version": "1.0"
+  },
+  {
+   "nombre": "supabase_vault",
+   "esquema": "vault",
+   "version": "0.3.1"
+  },
+  {
+   "nombre": "uuid-ossp",
+   "esquema": "extensions",
+   "version": "1.1"
+  }
+ ],
+ "restricciones": [
+  {
+   "tipo": "f",
+   "tabla": "admin_log",
+   "nombre": "admin_log_admin_id_fkey",
+   "definicion": "FOREIGN KEY (admin_id) REFERENCES super_admin(id)"
+  },
+  {
+   "tipo": "p",
+   "tabla": "admin_log",
+   "nombre": "admin_log_pkey",
+   "definicion": "PRIMARY KEY (id)"
+  },
+  {
+   "tipo": "p",
+   "tabla": "bloqueos",
+   "nombre": "bloqueos_pkey",
+   "definicion": "PRIMARY KEY (id)"
+  },
+  {
+   "tipo": "f",
+   "tabla": "bloqueos",
+   "nombre": "bloqueos_profesional_id_fkey",
+   "definicion": "FOREIGN KEY (profesional_id) REFERENCES profesionales(id) ON DELETE CASCADE"
+  },
+  {
+   "tipo": "u",
+   "tabla": "codigos_referido",
+   "nombre": "codigos_referido_codigo_key",
+   "definicion": "UNIQUE (codigo)"
+  },
+  {
+   "tipo": "p",
+   "tabla": "codigos_referido",
+   "nombre": "codigos_referido_pkey",
+   "definicion": "PRIMARY KEY (id)"
+  },
+  {
+   "tipo": "f",
+   "tabla": "codigos_referido",
+   "nombre": "codigos_referido_profesional_id_fkey",
+   "definicion": "FOREIGN KEY (profesional_id) REFERENCES profesionales(id)"
+  },
+  {
+   "tipo": "p",
+   "tabla": "configuracion_push",
+   "nombre": "configuracion_push_pkey",
+   "definicion": "PRIMARY KEY (id)"
+  },
+  {
+   "tipo": "p",
+   "tabla": "lista_espera",
+   "nombre": "lista_espera_pkey",
+   "definicion": "PRIMARY KEY (id)"
+  },
+  {
+   "tipo": "f",
+   "tabla": "lista_espera",
+   "nombre": "lista_espera_profesional_id_fkey",
+   "definicion": "FOREIGN KEY (profesional_id) REFERENCES profesionales(id)"
+  },
+  {
+   "tipo": "c",
+   "tabla": "pacientes",
+   "nombre": "pacientes_dia_semana_check",
+   "definicion": "CHECK (((dia_semana >= 1) AND (dia_semana <= 5)))"
+  },
+  {
+   "tipo": "c",
+   "tabla": "pacientes",
+   "nombre": "pacientes_frecuencia_check",
+   "definicion": "CHECK ((frecuencia = ANY (ARRAY['semanal'::text, 'quincenal'::text, 'mensual'::text, 'bimestral'::text, 'trimestral'::text])))"
+  },
+  {
+   "tipo": "p",
+   "tabla": "pacientes",
+   "nombre": "pacientes_pkey",
+   "definicion": "PRIMARY KEY (id)"
+  },
+  {
+   "tipo": "f",
+   "tabla": "pacientes",
+   "nombre": "pacientes_profesional_id_fkey",
+   "definicion": "FOREIGN KEY (profesional_id) REFERENCES profesionales(id) ON DELETE CASCADE"
+  },
+  {
+   "tipo": "c",
+   "tabla": "pacientes",
+   "nombre": "pacientes_semana_paridad_check",
+   "definicion": "CHECK ((semana_paridad = ANY (ARRAY['par'::text, 'impar'::text])))"
+  },
+  {
+   "tipo": "u",
+   "tabla": "pacientes",
+   "nombre": "pacientes_token_acceso_key",
+   "definicion": "UNIQUE (token_acceso)"
+  },
+  {
+   "tipo": "c",
+   "tabla": "pagos",
+   "nombre": "pagos_estado_check",
+   "definicion": "CHECK ((estado = ANY (ARRAY['pendiente'::text, 'pagado'::text, 'vencido'::text, 'reembolsado'::text])))"
+  },
+  {
+   "tipo": "c",
+   "tabla": "pagos",
+   "nombre": "pagos_metodo_check",
+   "definicion": "CHECK ((metodo = ANY (ARRAY['mercadopago'::text, 'transferencia'::text, 'efectivo'::text])))"
+  },
+  {
+   "tipo": "p",
+   "tabla": "pagos",
+   "nombre": "pagos_pkey",
+   "definicion": "PRIMARY KEY (id)"
+  },
+  {
+   "tipo": "f",
+   "tabla": "pagos",
+   "nombre": "pagos_profesional_id_fkey",
+   "definicion": "FOREIGN KEY (profesional_id) REFERENCES profesionales(id)"
+  },
+  {
+   "tipo": "u",
+   "tabla": "profesionales",
+   "nombre": "profesionales_codigo_referido_key",
+   "definicion": "UNIQUE (codigo_referido)"
+  },
+  {
+   "tipo": "u",
+   "tabla": "profesionales",
+   "nombre": "profesionales_email_key",
+   "definicion": "UNIQUE (email)"
+  },
+  {
+   "tipo": "p",
+   "tabla": "profesionales",
+   "nombre": "profesionales_pkey",
+   "definicion": "PRIMARY KEY (id)"
+  },
+  {
+   "tipo": "c",
+   "tabla": "profesionales",
+   "nombre": "profesionales_plan_check",
+   "definicion": "CHECK ((plan = ANY (ARRAY['starter'::text, 'profesional'::text, 'consultorio'::text, 'clinica'::text])))"
+  },
+  {
+   "tipo": "u",
+   "tabla": "profesionales",
+   "nombre": "profesionales_user_id_key",
+   "definicion": "UNIQUE (user_id)"
+  },
+  {
+   "tipo": "f",
+   "tabla": "push_log",
+   "nombre": "push_log_paciente_id_fkey",
+   "definicion": "FOREIGN KEY (paciente_id) REFERENCES pacientes(id)"
+  },
+  {
+   "tipo": "p",
+   "tabla": "push_log",
+   "nombre": "push_log_pkey",
+   "definicion": "PRIMARY KEY (id)"
+  },
+  {
+   "tipo": "f",
+   "tabla": "push_log",
+   "nombre": "push_log_profesional_id_fkey",
+   "definicion": "FOREIGN KEY (profesional_id) REFERENCES profesionales(id)"
+  },
+  {
+   "tipo": "c",
+   "tabla": "push_log",
+   "nombre": "push_log_tipo_check",
+   "definicion": "CHECK ((tipo = ANY (ARRAY['recordatorio_mensual'::text, 'recordatorio_sesion'::text, 'pre_sesion'::text, 'cancelacion_paciente'::text, 'cancelacion_profesional'::text, 'cambio_horario'::text, 'bienvenida'::text, 'custom'::text])))"
+  },
+  {
+   "tipo": "f",
+   "tabla": "push_log",
+   "nombre": "push_log_turno_id_fkey",
+   "definicion": "FOREIGN KEY (turno_id) REFERENCES turnos(id)"
+  },
+  {
+   "tipo": "u",
+   "tabla": "super_admin",
+   "nombre": "super_admin_email_key",
+   "definicion": "UNIQUE (email)"
+  },
+  {
+   "tipo": "p",
+   "tabla": "super_admin",
+   "nombre": "super_admin_pkey",
+   "definicion": "PRIMARY KEY (id)"
+  },
+  {
+   "tipo": "u",
+   "tabla": "super_admin",
+   "nombre": "super_admin_user_id_key",
+   "definicion": "UNIQUE (user_id)"
+  },
+  {
+   "tipo": "c",
+   "tabla": "turnos",
+   "nombre": "turnos_estado_check",
+   "definicion": "CHECK ((estado = ANY (ARRAY['confirmado'::text, 'cancelado_paciente'::text, 'cancelado_profesional'::text, 'realizado'::text, 'ausente'::text])))"
+  },
+  {
+   "tipo": "f",
+   "tabla": "turnos",
+   "nombre": "turnos_paciente_id_fkey",
+   "definicion": "FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE"
+  },
+  {
+   "tipo": "p",
+   "tabla": "turnos",
+   "nombre": "turnos_pkey",
+   "definicion": "PRIMARY KEY (id)"
+  },
+  {
+   "tipo": "f",
+   "tabla": "turnos",
+   "nombre": "turnos_profesional_id_fkey",
+   "definicion": "FOREIGN KEY (profesional_id) REFERENCES profesionales(id) ON DELETE CASCADE"
+  }
+ ],
+ "permisos_tablas": [],
+ "version_postgres": "PostgreSQL 17.6 on aarch64-unknown-linux-gnu, compiled by gcc (GCC) 15.2.0, 64-bit",
+ "privilegios_columnas": [],
+ "publicaciones_realtime": [],
+ "privilegios_por_defecto": [
+  {
+   "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+   "esquema": "storage",
+   "rol_dueno": "postgres",
+   "tipo_objeto": "r"
+  },
+  {
+   "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+   "esquema": "storage",
+   "rol_dueno": "postgres",
+   "tipo_objeto": "f"
+  },
+  {
+   "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}",
+   "esquema": "storage",
+   "rol_dueno": "postgres",
+   "tipo_objeto": "S"
+  },
+  {
+   "acl": "{postgres=arwdDxtm/supabase_auth_admin,dashboard_user=arwdDxtm/supabase_auth_admin}",
+   "esquema": "auth",
+   "rol_dueno": "supabase_auth_admin",
+   "tipo_objeto": "r"
+  },
+  {
+   "acl": "{postgres=rwU/supabase_auth_admin,dashboard_user=rwU/supabase_auth_admin}",
+   "esquema": "auth",
+   "rol_dueno": "supabase_auth_admin",
+   "tipo_objeto": "S"
+  },
+  {
+   "acl": "{postgres=X/supabase_auth_admin,dashboard_user=X/supabase_auth_admin}",
+   "esquema": "auth",
+   "rol_dueno": "supabase_auth_admin",
+   "tipo_objeto": "f"
+  },
+  {
+   "acl": "{postgres=arwdDxtm/supabase_admin,dashboard_user=arwdDxtm/supabase_admin}",
+   "esquema": "realtime",
+   "rol_dueno": "supabase_admin",
+   "tipo_objeto": "r"
+  },
+  {
+   "acl": "{postgres=rwU/supabase_admin,dashboard_user=rwU/supabase_admin}",
+   "esquema": "realtime",
+   "rol_dueno": "supabase_admin",
+   "tipo_objeto": "S"
+  },
+  {
+   "acl": "{postgres=X/supabase_admin,dashboard_user=X/supabase_admin}",
+   "esquema": "realtime",
+   "rol_dueno": "supabase_admin",
+   "tipo_objeto": "f"
+  },
+  {
+   "acl": "{postgres=rwU/supabase_admin,anon=rwU/supabase_admin,authenticated=rwU/supabase_admin,service_role=rwU/supabase_admin}",
+   "esquema": "graphql_public",
+   "rol_dueno": "supabase_admin",
+   "tipo_objeto": "S"
+  },
+  {
+   "acl": "{postgres=arwdDxtm/supabase_admin,anon=arwdDxtm/supabase_admin,authenticated=arwdDxtm/supabase_admin,service_role=arwdDxtm/supabase_admin}",
+   "esquema": "graphql_public",
+   "rol_dueno": "supabase_admin",
+   "tipo_objeto": "r"
+  },
+  {
+   "acl": "{postgres=X/supabase_admin,anon=X/supabase_admin,authenticated=X/supabase_admin,service_role=X/supabase_admin}",
+   "esquema": "graphql_public",
+   "rol_dueno": "supabase_admin",
+   "tipo_objeto": "f"
+  },
+  {
+   "acl": "{postgres=a*r*w*d*D*x*t*m*/supabase_admin}",
+   "esquema": "extensions",
+   "rol_dueno": "supabase_admin",
+   "tipo_objeto": "r"
+  },
+  {
+   "acl": "{postgres=X*/supabase_admin}",
+   "esquema": "extensions",
+   "rol_dueno": "supabase_admin",
+   "tipo_objeto": "f"
+  },
+  {
+   "acl": "{postgres=r*w*U*/supabase_admin}",
+   "esquema": "extensions",
+   "rol_dueno": "supabase_admin",
+   "tipo_objeto": "S"
+  },
+  {
+   "acl": "{postgres=arwdDxtm/supabase_admin,anon=arwdDxtm/supabase_admin,authenticated=arwdDxtm/supabase_admin,service_role=arwdDxtm/supabase_admin}",
+   "esquema": "graphql",
+   "rol_dueno": "supabase_admin",
+   "tipo_objeto": "r"
+  },
+  {
+   "acl": "{postgres=X/supabase_admin,anon=X/supabase_admin,authenticated=X/supabase_admin,service_role=X/supabase_admin}",
+   "esquema": "graphql",
+   "rol_dueno": "supabase_admin",
+   "tipo_objeto": "f"
+  },
+  {
+   "acl": "{postgres=rwU/supabase_admin,anon=rwU/supabase_admin,authenticated=rwU/supabase_admin,service_role=rwU/supabase_admin}",
+   "esquema": "graphql",
+   "rol_dueno": "supabase_admin",
+   "tipo_objeto": "S"
+  }
+ ],
+ "funciones_otros_esquemas": []
+}

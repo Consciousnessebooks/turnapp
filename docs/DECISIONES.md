@@ -71,6 +71,20 @@ Martín sube el kit a `main` antes de la primera sesión (guía). Por eso `CLAUD
 ## Registro de decisiones nuevas (Claude Code)
 _(agregá acá, la más nueva arriba)_
 
+### N-05 · 2026-11-16 · `.verificacion/` en .gitignore
+CLAUDE.md asume que `.verificacion/` está ignorado y no lo estaba. Se agrega la línea en la Fase 0 (único cambio fuera de `docs/` y `supabase/tests/fixtures/`, sin efecto en build ni producción).
+
+### N-04 · 2026-11-16 · Recomendación de base: reconstruir (pendiente del "Reconstruir" de Martín)
+Contexto: conteo exacto 2 profesionales (ambos `@test`), 5 pacientes, 16 turnos de abril 2026; frontend y base no coinciden; sin grants, sin triggers, funciones sin validación, faltan btree_gist/pg_cron/pg_net. Decisión propuesta: reconstruir `public` con drops explícitos (§5.4). Alternativa descartada: adoptar (arrastra objetos inseguros y casi todo se reescribe igual). Verificación: DIAGNOSTICO.md §6–§9.
+
+### N-03 · 2026-11-16 · Dominio y hosting (datos [VERIFICAR])
+- Disponibilidad por RDAP oficial de NIC Argentina, `https://rdap.nic.ar/domain/<nombre>` (consultado 2026-11-16): turnapp.com.ar, turnapp.ar y turnosapp.com.ar registrados; turnappsalud.com.ar y miturnapp.com.ar libres (404).
+- Arancel NIC: ARS 8.500/año .com.ar y ARS 25.500/año .ar, según búsqueda web que cita `https://nic.ar/es/dominios/aranceles` (2026-11-16). nic.ar no responde desde la sesión: NO VERIFICADO en la fuente directa; Martín lo ve en la pantalla de pago.
+- Requisitos NIC: CUIT/CUIL y Clave Fiscal nivel 2 o superior, por TAD. Fuente: búsqueda web (tiendanube.com/blog/como-registrar-dominio-com-ar-en-nic, 2026-11-16). NO VERIFICADO en nic.ar.
+- Cloudflare Workers: "Requests to static assets are free and unlimited" y plan Free por defecto, `https://developers.cloudflare.com/workers/platform/pricing/index.md` (leído 2026-11-16). `https://www.cloudflare.com/terms/` (leído 2026-11-16): sin cláusula de uso personal o no comercial.
+- Vercel Hobby: "restricted to non-commercial personal use only", `https://vercel.com/docs/limits/fair-use-guidelines` (búsqueda web 2026-11-16).
+Decisión propuesta: turnappsalud.com.ar en NIC (Martín elige el nombre), DNS en Cloudflare, hosting Cloudflare Workers con assets estáticos.
+
 ### N-02 · 2026-11-16 · Rama de trabajo de la sesión
 Contexto: CLAUDE.md pide ramas `fase-<id>-<tema>`, pero el entorno de esta sesión solo permite pushear a `claude/stoic-ride-yk4por`. Decisión: la Fase 0 vive en `claude/stoic-ride-yk4por` (creada desde `origin/main` 310c1f9) y su PR sale de ahí. Fases siguientes: rama propia si el entorno lo permite; si no, la rama de la sesión correspondiente. Alternativa descartada: pushear a otra rama sin permiso del entorno. Verificación: `git push -u origin claude/stoic-ride-yk4por` funcionó.
 

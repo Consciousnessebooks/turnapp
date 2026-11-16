@@ -1,5 +1,5 @@
 # PROGRESO — TURNAPP
-Actualizado: 2026-11-16 21:00 (hora Argentina) — Fase 0 mergeada (#2); Fase 1a lista para revisión
+Actualizado: 2026-11-16 20:58 (hora Argentina) — Fase 1a revisada; el "21:30" que quedó en main por #2 era un error de hora (real: ~20:30)
 Fase actual: 1a — Hotfix
 Rama de trabajo: claude/stoic-ride-yk4por (base: 84494b1)
 PR abierto: ninguno todavía (Fase 1a)

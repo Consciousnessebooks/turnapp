@@ -108,13 +108,7 @@ export default function App() {
   // Check session on mount
   useEffect(() => {
     if (!supabase) return undefined;
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setUser(session.user);
-        checkUserRole(session.user.id);
-      }
-    });
-
+    // onAuthStateChange emite INITIAL_SESSION al suscribirse: no hace falta llamar también a getSession().
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {

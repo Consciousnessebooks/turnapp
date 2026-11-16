@@ -3,7 +3,8 @@
 -- No editar a mano: lo genera supabase/tests/fixtures/generar_fixture.py desde la introspección completa (sin redactar),
 -- que queda fuera del repo en .verificacion/diagnostico/esquema-AAAA-MM-DD.json.
 -- Las tablas no tienen grants para anon/authenticated/service_role (relacl nulo en todas, 0 filas de pg_default_acl en public;
--- consultas de solo lectura del 2026-11-16). El final de este archivo revoca lo que el stack local agrega.
+-- consultas de solo lectura del 2026-11-16). El final de este archivo revoca lo que el stack local agrega; tras el revoke
+-- relacl queda explícito solo para el dueño, equivalente en efecto al nulo de producción (comparar con has_table_privilege).
 -- En Postgres sin Supabase, aplicar antes preludio-postgres.sql (esquemas extensions y auth, stub de auth.uid()).
 -- Límites conocidos: la introspección no captura dueños, OWNED BY ni parámetros de secuencias ni comentarios (se asumen
 -- los valores por defecto; pacientes_numero_seq pertenece a pacientes.numero). Las funciones en producción usan CRLF.

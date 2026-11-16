@@ -9,7 +9,7 @@ Mapa de las 8 reglas fundacionales (ESPECIFICACION §2.2) a los tests que las pr
 | 3. Resumen mensual (día 25) | Fechas del mes siguiente (patrón + extras), honorario y total; turnos confirmados por defecto; reloj simulado | — | Sin tests todavía |
 | 4. Cancelación por el paciente | Anticipación mínima validada en el servidor; aviso al profesional; WhatsApp si falta menos | — | Sin tests todavía |
 | 5. Multiplataforma | e2e en 360 y 1280 px; instalabilidad | — | Sin tests todavía |
-| 6. Bloqueo por el profesional | Día, franja o varios días; cancela afectados y manda un mensaje a cada paciente (con fecha de regreso en el piloto) | — | Sin tests todavía |
+| 6. Bloqueo por el profesional | Día, franja o varios días; cancela afectados y manda un mensaje a cada paciente (en el piloto: mensaje genérico o fecha de regreso) | — | Sin tests todavía |
 | 7. Cambio de sesiones por mes sin huecos | Desde una fecha; no toca el pasado; detecta choques; lista de horarios liberados | — | Sin tests todavía |
 | 8. Honorarios individuales | Cambio afecta solo futuros no cancelados desde la fecha; el honorario aparece en todos los avisos de turnos y montos | — | Sin tests todavía |
 

@@ -3,7 +3,7 @@ Actualizado: 2026-11-16 21:30 (hora Argentina) — Fase 0 hecha, en revisión
 Fase actual: 0 — Diagnóstico
 Rama de trabajo: claude/stoic-ride-yk4por (base: main@310c1f9)
 PR abierto: ninguno
-Último commit verificado: 13b2e09 — Fase 0 (diagnóstico)
+Último commit verificado: 6110bb5 — Fase 0 (diagnóstico), evidencia en .verificacion/6110bb5/
 ## Arranque (terminado 2026-11-16)
 - [x] 1. CLAUDE.md cargado; los 7 subagentes aparecen en la herramienta de agentes
 - [x] 2. `bash .claude/hooks/probar-guardia.sh` → "TODAS LAS PRUEBAS PASARON (118 casos)", exit 0. `git push origin main` real → "BLOQUEADO por .claude/hooks/guardia.sh: push a main prohibido"
@@ -18,7 +18,7 @@ PR abierto: ninguno
 - [x] 4. Crash reproducido con Playwright en local y producción: `e is not a function` → sourcemap src/App.jsx:456 `onSuccess` (App pasa `onLogin`, línea 352). CSP/eval: extensión del navegador (producción no manda CSP)
 - [x] 5. gitleaks v8.21.2 (Docker) exit 1, 3 hallazgos (detalle solo en el chat). Bundle de producción: solo JWT `anon`. Claves legacy deshabilitadas (API: "Legacy API keys are disabled")
 - [x] 6. Introspección §13.1 por la consulta de solo lectura (HTTP 201); cron.job no existe (pg_cron ausente); versión commiteable en docs/diagnostico/esquema-2026-11-16.json
-- [x] 7. Real vs. esperado en DIAGNOSTICO §6; puerta trasera posible: usuario2 (a confirmar); fixture aplica en postgres:17.6 (11 tablas, 2 vistas, 9 políticas, 5 funciones)
+- [x] 7. Real vs. esperado en DIAGNOSTICO §6; fixture aplica en postgres:17.6 (11 tablas, 2 vistas, 9 políticas, 5 funciones)
 - [x] 8. Conteo exacto: 2 profesionales, 5 pacientes, 16 turnos (abril 2026), 1 super_admin
 - [x] 9. Recomendación: reconstruir (DECISIONES N-04)
 - [x] 10. Dominio: miturnapp.com.ar libre por RDAP; NIC ARS 8.500/año (NO VERIFICADO en nic.ar directo); hosting Cloudflare Workers
@@ -27,8 +27,8 @@ PR abierto: ninguno
 Cerrar la puerta de revisión, abrir el PR de Fase 0 y mandar el informe a Martín. La Fase 1a (hotfix) está lista en la rama local `fase-1a-hotfix-local` (commit cb3c62d) y se sube a `claude/stoic-ride-yk4por` cuando se mergee la Fase 0 (el entorno no permite pushear otra rama).
 ## Esperando a Martín
 - M-14 variante A (proteger `main` con un ruleset)
-- M-03: captura de que el secreto JWT legacy quedó revocado; cambio de las dos contraseñas expuestas (detalle en el chat)
-- Confirmar si usuario2 y los 5 pacientes son de prueba
+- M-03: pasos de seguridad pendientes (detalle en el chat)
+- Confirmar si las cuentas y los 5 pacientes son de prueba (detalle en el chat)
 - Decisiones: "Reconstruir" o "Adoptar"; nombre de dominio
 ## Decisiones pendientes de Martín
 - Adoptar o reconstruir la base (se pregunta en el informe de Fase 0)

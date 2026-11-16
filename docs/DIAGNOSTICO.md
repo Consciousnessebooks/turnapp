@@ -50,17 +50,28 @@ Dependencias con rango `^` sin lockfile (regla 11): se fijan en la Fase 1a/1b.
 - Pendiente de Martín: confirmar con captura que el secreto JWT legacy quedó revocado (M-03).
 
 ## 6. Base de datos: esperado vs. real
-Introspección completa: `docs/diagnostico/esquema-2026-11-16.json` (sin usuarios). Estructura reproducible: `supabase/tests/fixtures/esquema-produccion.sql` (aplica sin errores en Postgres 17.6 limpio: 11 tablas, 2 vistas, 9 políticas, 5 funciones).
+Introspección: `docs/diagnostico/esquema-2026-11-16.json` (versión redactada: sin usuarios, sin privilegios por rol). Estructura reproducible: `supabase/tests/fixtures/esquema-produccion.sql`. En un Postgres sin Supabase se aplica después de `supabase/tests/fixtures/preludio-postgres.sql` (esquemas `extensions` y `auth`, roles y stub de `auth.uid()`); en `postgres:17.6` da exit 0 con 11 tablas, 2 vistas, 9 políticas y 5 funciones (evidencia: `.verificacion/<sha>/fixture-aplica.log`). Aplicarlo sobre el stack local de Supabase: NO VERIFICADO todavía (se hace en la Fase 2).
 
 | Tema | Esperado (doc vieja, ESPECIFICACION §1) | Real (2026-11-16) |
 |---|---|---|
-| Tablas | 11 | Las 11 esperadas. RLS activo en 9; sin RLS: `super_admin`, `configuracion_push` |
-| Columnas de `profesionales` | `dias_atencion`, `hora_inicio`, `hora_fin`, `duracion`, `honorario`, `limite` | Se llaman `dias_laborales`, `horario_inicio`, `horario_fin`, `duracion_sesion_default`, `honorario_base`, `max_pacientes`; `activo` default `false` |
-| Funciones | 4 + quizás de portal | 5: las 4 + `fn_updated_at` (sin trigger que la use). Ninguna `security definer`; todas ejecutables por `anon` y `authenticated` |
-| Vistas | 2 | `v_admin_dashboard`, `v_turnos_hoy`, sin `security_invoker` |
+| Tablas | 11 | Las 11 esperadas |
+| Columnas de `profesionales` | `dias_atencion`, `hora_inicio`, `hora_fin`, `duracion`, `honorario`, `limite` | Se llaman `dias_laborales`, `horario_inicio`, `horario_fin`, `duracion_sesion_default`, `honorario_base`, `max_pacientes` (default 15); `activo` default `false` |
+| Funciones | 4 + quizás de portal | 5: las 4 + `fn_updated_at`. Ninguna fija `search_path` |
+| Vistas | 2 | `v_admin_dashboard`, `v_turnos_hoy` |
 | Triggers | — | Ninguno (`updated_at` no se actualiza solo) |
 | Extensiones | pg_cron, pg_net, btree_gist, pgcrypto | pgcrypto, uuid-ossp, pg_graphql, pg_stat_statements, supabase_vault. **Faltan** pg_cron, pg_net y btree_gist |
-| Grants de tablas a `anon`/`authenticated` | — | Ninguno (`relacl` nulo; `has_table_privilege` falso en las 13 relaciones). La app no puede leer ni escribir ninguna tabla por la API aunque el login funcione |
+| Grants de tablas y privilegios por defecto | — | Ninguno: las 13 relaciones de `public` tienen `relacl` nulo y no hay filas de `pg_default_acl` en `public`. La app no puede leer ni escribir ninguna tabla por la API aunque el login funcione |
+| Fechas y horas | `timestamptz` (§3.6) | `turnos.fecha` `date` + `hora_inicio`/`hora_fin` `time` sin zona |
+| Integridad de tenant (§6.3) | `unique (id, profesional_id)` + FKs compuestas | No existen; FKs simples a `profesionales(id)` y `pacientes(id)` |
+| FKs hacia `auth.users` | `profesionales.user_id`, `super_admin.user_id` | No existen. Tampoco FK en `referido_por` ni `habilitado_por` |
+| `ON DELETE` | explícito | Sin acción explícita en `admin_log`, `codigos_referido`, `lista_espera`, `pagos` y las 3 FKs de `push_log` |
+| Choques de turnos | exclusión con `btree_gist` | Solo `idx_turno_slot` (único sobre el inicio exacto); no evita solapamientos |
+| NOT NULL | estados, `activo`, `created_at` obligatorios | `estado`, `activo` y `created_at` aceptan nulos |
+| Índices | sin duplicados | `idx_pac_token` duplica `pacientes_token_acceso_key` |
+| Estados de turno (§3.14) | incluye `cancelado_bloqueo`, `cancelado_cambio_plan` | No están en el check de `turnos.estado` |
+| Planes (§2.3) | planes de §2.3 | Check con `starter`, `profesional`, `consultorio`, `clinica` |
+| Frecuencias | reemplazadas por sesiones por mes (D-03) | `pacientes.frecuencia` con check `semanal`, `quincenal`, `mensual`, `bimestral`, `trimestral`; no hay tabla de recurrencias |
+| Secuencias | — | `pacientes_numero_seq`, pertenece a `pacientes.numero` (`pg_get_serial_sequence`) |
 | Realtime | ninguna publicación | ninguna |
 
 El frontend no coincide con la base (otra razón por la que no funcionaría):
@@ -79,24 +90,23 @@ Conteo exacto (consulta aparte; `filas_aprox = -1` en todas las tablas = nunca a
 |---|---|
 | profesionales | 2 |
 | pacientes | 5 |
-| turnos | 16 (todos entre 2026-04-01 y 2026-04-29) |
+| turnos | 16 (todos de abril de 2026) |
 | super_admin | 1 |
 | configuracion_push, push_log, pagos, bloqueos, lista_espera, codigos_referido, admin_log | 0 |
 
-Usuarios de Auth (emails redactados):
-| # | id | Email | Creado | Último ingreso | Rol en la base |
-|---|---|---|---|---|---|
-| usuario1 | 49d02705-9df3-4690-8ab5-5dbe6183fff9 | usuario1@gmail… | 2026-03-13 | 2026-03-19 | fila de `super_admin` |
-| usuario2 | b0bc5f01-8d84-46be-b1de-f943e676fd46 | usuario2@test… | 2026-03-16 | nunca | profesional |
-| usuario3 | 29070354-48f5-41af-b413-72241422a30c | usuario3@test… | 2026-03-19 | nunca (email sin confirmar) | profesional |
-
-Posibles puertas traseras a confirmar por Martín: `usuario2` no figuraba en la documentación (ver chat). No hay otras filas en `super_admin`.
+Usuarios de Auth: 3 (1 con fila de Super Admin, 2 con fila de profesional). El detalle y lo que Martín tiene que confirmar van en el chat del 2026-11-16.
 
 ## 8. Riesgos de seguridad
 Riesgos: ver chat del 2026-11-16; se corrigen en Fase 2 (salvo los urgentes, que son pasos de Martín).
 
 ## 9. Recomendación para la base: reconstruir
-Si Martín confirma que los 5 pacientes y 16 turnos son de prueba: **reconstruir** el esquema `public` en el mismo proyecto (los usuarios de Auth se conservan). Motivos: el frontend y la base no coinciden en nombres; no hay grants ni triggers; las funciones no validan permisos; el modelo de "frecuencias" se reemplaza por "sesiones por mes" (D-03) y faltan extensiones (btree_gist para evitar choques, pg_cron, pg_net). Adoptar exigiría reescribir casi todo igual, arrastrando objetos inseguros. La reconstrucción empieza con `drop` explícito de cada objeto listado en §6 (nunca `drop schema public cascade`) y requiere el "Reconstruir" escrito de Martín.
+Si Martín confirma que los 5 pacientes y 16 turnos son de prueba: **reconstruir** el esquema `public` en el mismo proyecto (los usuarios de Auth se conservan). Motivos: el modelo de "frecuencias" se reemplaza por "sesiones por mes" con recurrencias (D-03, §3); fechas sin zona en vez de `timestamptz`; sin integridad de tenant compuesta ni exclusión de choques; estados incompletos; frontend y base con nombres distintos; sin grants ni triggers; faltan btree_gist, pg_cron y pg_net. Adoptar exigiría reescribir casi todo igual.
+Inventario exacto para los `drop` (orden de dependencia; la migración lleva `-- APROBADO-POR-MARTIN: AAAA-MM-DD PR #n` en la primera línea y su cita en DECISIONES.md, nunca `drop schema public cascade`):
+1. Vistas: `v_turnos_hoy`, `v_admin_dashboard`.
+2. Funciones: `generar_turnos_profesional(uuid, integer, integer)`, `generar_turnos_paciente(uuid, integer, integer)`, `resumen_mensual(uuid, integer, integer)`, `cancelar_turno_paciente(uuid, text, text)`, `fn_updated_at()`.
+3. Políticas (9): `bloq_all`, `ref_all`, `espera_all`, `pac_all`, `pago_select`, `prof_select`, `prof_update`, `push_all`, `turno_all` (se van con sus tablas, se listan igual).
+4. Tablas: `push_log`, `turnos`, `bloqueos`, `lista_espera`, `codigos_referido`, `pagos`, `admin_log`, `pacientes` (arrastra `pacientes_numero_seq`, que le pertenece), `configuracion_push`, `super_admin`, `profesionales`.
+Si algún paciente es real: adoptar, con migración de frecuencias en dos pasos según §3.13 (los valores reales del check son `semanal`, `quincenal`, `mensual`, `bimestral`, `trimestral`).
 
 ## 10. Repo y modo de despliegue
 Repo **público** (dueño User). `main` sin protección y sin rulesets → M-14 variante A (ruleset `proteger-main`). **Modo A (automático)**: entorno `produccion` con secretos de entorno (M-05, Fase 2d). Se pueden pushear workflows.

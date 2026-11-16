@@ -1,7 +1,12 @@
 -- Estructura de producción (proyecto hszobstcatbyzijbdnpv), solo estructura, sin datos.
 -- Generado el 2026-11-16 desde la introspección de solo lectura (ESPECIFICACION §13.1). PostgreSQL 17.6.
--- No editar a mano: se regenera desde .verificacion/diagnostico/esquema-AAAA-MM-DD.json.
--- Las tablas no tienen grants para anon/authenticated/service_role (relacl nulo al 2026-11-16).
+-- No editar a mano: lo genera supabase/tests/fixtures/generar_fixture.py desde la introspección completa (sin redactar),
+-- que queda fuera del repo en .verificacion/diagnostico/esquema-AAAA-MM-DD.json.
+-- Las tablas no tienen grants para anon/authenticated/service_role (relacl nulo en todas, 0 filas de pg_default_acl en public;
+-- consultas de solo lectura del 2026-11-16). El final de este archivo revoca lo que el stack local agrega.
+-- En Postgres sin Supabase, aplicar antes preludio-postgres.sql (esquemas extensions y auth, stub de auth.uid()).
+-- Límites conocidos: la introspección no captura dueños, OWNED BY ni parámetros de secuencias ni comentarios (se asumen
+-- los valores por defecto; pacientes_numero_seq pertenece a pacientes.numero). Las funciones en producción usan CRLF.
 
 create extension if not exists "pgcrypto" with schema extensions;
 create extension if not exists "uuid-ossp" with schema extensions;
@@ -471,3 +476,11 @@ SELECT t.id,
      JOIN pacientes p ON p.id = t.paciente_id
   WHERE t.fecha = CURRENT_DATE
   ORDER BY t.hora_inicio;
+
+-- Producción no tiene grants de tablas ni privilegios por defecto en public: reproducirlo sobre el stack local.
+revoke all on all tables in schema public from anon, authenticated, service_role;
+revoke all on all sequences in schema public from anon, authenticated, service_role;
+alter default privileges for role postgres in schema public revoke all on tables from anon, authenticated, service_role;
+alter default privileges for role postgres in schema public revoke all on sequences from anon, authenticated, service_role;
+alter default privileges for role postgres in schema public revoke all on functions from anon, authenticated, service_role;
+-- Las funciones conservan EXECUTE para PUBLIC, como en producción.

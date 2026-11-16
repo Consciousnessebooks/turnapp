@@ -71,11 +71,18 @@ Martín sube el kit a `main` antes de la primera sesión (guía). Por eso `CLAUD
 ## Registro de decisiones nuevas (Claude Code)
 _(agregá acá, la más nueva arriba)_
 
+### N-07 · 2026-11-16 · Fixture de producción: ubicación y EXECUTE de funciones
+- Se mantiene en `supabase/tests/fixtures/` (lo pide §5.4). NO VERIFICADO si `npx supabase test db` toma `.sql` de subcarpetas de `supabase/tests/`: se comprueba al empezar la Fase 2; si los toma, se mueve a `supabase/fixtures/` (observación de auditor-seguridad).
+- El fixture revoca grants de tablas y privilegios por defecto (producción no tiene), pero deja EXECUTE de funciones para PUBLIC porque así está en producción (arquitecto-supabase). auditor-seguridad proponía revocarlo; se prioriza que la réplica sea fiel. Se corrige en la reconstrucción.
+
+### N-06 · 2026-11-16 · Qué se publica del diagnóstico (repo público)
+Contexto: revisor-codigo pidió no publicar riesgos ni datos para apuntar a cuentas; arquitecto-supabase pidió más detalle estructural. Decisión: en el repo quedan los hechos de estructura (los exige §9 Fase 0 y el fixture los contiene de todos modos) sin valoraciones de riesgo; la introspección versionada se redacta (sin `execute_*`, `security_definer`, `rls`, `config`, `opciones`, `acl` ni privilegios); UUIDs de Auth, dominios de email y sospechas de cuentas van solo al chat. El commit 13b2e09 ya publicó los UUID de los 3 usuarios: no son secretos y no se reescribe el historial (force push prohibido).
+
 ### N-05 · 2026-11-16 · `.verificacion/` en .gitignore
 CLAUDE.md asume que `.verificacion/` está ignorado y no lo estaba. Se agrega la línea en la Fase 0 (único cambio fuera de `docs/` y `supabase/tests/fixtures/`, sin efecto en build ni producción).
 
 ### N-04 · 2026-11-16 · Recomendación de base: reconstruir (pendiente del "Reconstruir" de Martín)
-Contexto: conteo exacto 2 profesionales (ambos `@test`), 5 pacientes, 16 turnos de abril 2026; frontend y base no coinciden; sin grants, sin triggers, funciones sin validación, faltan btree_gist/pg_cron/pg_net. Decisión propuesta: reconstruir `public` con drops explícitos (§5.4). Alternativa descartada: adoptar (arrastra objetos inseguros y casi todo se reescribe igual). Verificación: DIAGNOSTICO.md §6–§9.
+Contexto: conteo exacto 2 profesionales, 5 pacientes, 16 turnos de abril 2026 (a confirmar por Martín que son de prueba); el modelo de frecuencias, las fechas sin zona y la falta de integridad de tenant obligan a rehacer casi todo. Decisión propuesta: reconstruir `public` con drops explícitos del inventario de DIAGNOSTICO §9 (§5.4). Alternativa descartada: adoptar (solo si hay pacientes reales, con la migración de §3.13). Verificación: DIAGNOSTICO.md §6–§9.
 
 ### N-03 · 2026-11-16 · Dominio y hosting (datos [VERIFICAR])
 - Disponibilidad por RDAP oficial de NIC Argentina, `https://rdap.nic.ar/domain/<nombre>` (consultado 2026-11-16): turnapp.com.ar, turnapp.ar y turnosapp.com.ar registrados; turnappsalud.com.ar y miturnapp.com.ar libres (404).

@@ -1,0 +1,9 @@
+# Prueba de permisos para pushear workflows (Arranque). Se borra en el commit siguiente.
+name: prueba-permisos
+on: workflow_dispatch
+permissions: { contents: read }
+jobs:
+  nada:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ok

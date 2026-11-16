@@ -131,11 +131,12 @@ export default function App() {
 
   const checkUserRole = async (userId) => {
     try {
-      const { data: adminData } = await supabase
+      const { data: adminData, error: adminError } = await supabase
         .from('super_admin')
         .select('user_id')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
+      if (adminError) throw adminError;
 
       if (adminData) {
         setUserRole('admin');
@@ -143,11 +144,12 @@ export default function App() {
         return;
       }
 
-      const { data: profData } = await supabase
+      const { data: profData, error: profError } = await supabase
         .from('profesionales')
         .select('id, user_id')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
+      if (profError) throw profError;
 
       if (profData) {
         setUserRole('professional');
@@ -160,7 +162,9 @@ export default function App() {
       notify("Tu usuario todavía no tiene acceso. Escribile al administrador.", "error");
       await supabase.auth.signOut();
     } catch (error) {
-      console.error('Error checking role:', error);
+      // Error de red o de permisos: no es "sin acceso", así que no se cierra la sesión.
+      console.warn('No se pudo verificar el rol:', error?.code ?? 'sin código');
+      notify(MSG_SIN_CONEXION, 'error');
     }
   };
 

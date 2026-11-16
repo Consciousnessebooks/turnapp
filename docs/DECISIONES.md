@@ -74,6 +74,8 @@ _(agregá acá, la más nueva arriba)_
 ### N-10 · 2026-11-16 · Fase 1a: alcance del hotfix
 - Las claves de Supabase salen del código y pasan a `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` (§5.5). La clave legacy embebida ya estaba deshabilitada, así que producción no pierde nada: sin variables, el login muestra "El ingreso no está disponible en este momento". Las variables con la clave publishable nueva se cargan en Vercel cuando la base esté lista (Fase 2/3): hoy, aunque el login anduviera, no hay grants y los nombres no coinciden.
 - Fuera del hotfix (quedan para la 1b): actualizar Vite a una versión mayor por `npm audit` (1 high y 1 moderate, solo del servidor de desarrollo, no del build publicado), el resto de los datos de demo en pantallas y la reestructura.
+- Verificación de rol con `maybeSingle()`: sin fila es "sin acceso" (aviso y cierre de sesión); un error de red o permisos muestra "El ingreso no está disponible" y no cierra la sesión (observación de frontend-ux).
+- Pendientes de frontend-ux para la 1b: decidir por `error.code` (email no confirmado), avisar "Sesión iniciada" después del rol, región viva siempre montada, contrastes del Toast y textos grises, inputs de 16 px y rem.
 - Se agrega `role="status"` al aviso (observación de qa-testing) para que el error sea accesible y el humo lo busque por rol.
 
 ### N-09 · 2026-11-16 · PR #2 squash-mergeado; rama de la sesión reutilizada

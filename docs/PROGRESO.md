@@ -2,7 +2,7 @@
 Actualizado: 2026-11-16 21:30 (hora Argentina) — Fase 0 hecha, en revisión
 Fase actual: 0 — Diagnóstico
 Rama de trabajo: claude/stoic-ride-yk4por (base: main@310c1f9)
-PR abierto: ninguno
+PR abierto: #2 https://github.com/Consciousnessebooks/turnapp/pull/2 (Fase 0)
 Último commit verificado: 6110bb5 — Fase 0 (diagnóstico), evidencia en .verificacion/6110bb5/
 ## Arranque (terminado 2026-11-16)
 - [x] 1. CLAUDE.md cargado; los 7 subagentes aparecen en la herramienta de agentes
@@ -22,9 +22,10 @@ PR abierto: ninguno
 - [x] 8. Conteo exacto: 2 profesionales, 5 pacientes, 16 turnos (abril 2026), 1 super_admin
 - [x] 9. Recomendación: reconstruir (DECISIONES N-04)
 - [x] 10. Dominio: miturnapp.com.ar libre por RDAP; NIC ARS 8.500/año (NO VERIFICADO en nic.ar directo); hosting Cloudflare Workers
-- [ ] 11. Puerta de revisión y PR "Fase 0 — Diagnóstico"  ← PRÓXIMO
+- [x] 11. Puerta de revisión: los 5 subagentes APROBADO (62c83c8); PR #2 abierto
+- [ ] 12. Merge de Martín → subir la Fase 1a  ← PRÓXIMO
 ## Próximo paso
-Cerrar la puerta de revisión, abrir el PR de Fase 0 y mandar el informe a Martín. La Fase 1a (hotfix) está lista en la rama local `fase-1a-hotfix-local` (commit cb3c62d) y se sube a `claude/stoic-ride-yk4por` cuando se mergee la Fase 0 (el entorno no permite pushear otra rama).
+Esperar el merge de #2. La Fase 1a (hotfix) está lista en la rama local `fase-1a-hotfix-local` (commit cb3c62d) y se sube a `claude/stoic-ride-yk4por` cuando se mergee la Fase 0 (el entorno no permite pushear otra rama).
 ## Esperando a Martín
 - M-14 variante A (proteger `main` con un ruleset)
 - M-03: pasos de seguridad pendientes (detalle en el chat)

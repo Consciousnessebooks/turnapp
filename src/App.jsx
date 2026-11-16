@@ -29,7 +29,7 @@ const theme = {
 function Toast({ msg, type }) {
   if (!msg) return null;
   const bg = type==="success"?"#059669":type==="error"?"#dc2626":"#0891b2";
-  return <div style={{ position:"fixed",bottom:20,right:20,background:bg,color:"#fff",padding:"12px 20px",borderRadius:12,zIndex:9999,fontSize:13,fontWeight:600,boxShadow:"0 8px 24px rgba(0,0,0,.2)",maxWidth:340,animation:"slideUp .3s ease" }}>{msg}</div>;
+  return <div role="status" aria-live="polite" style={{ position:"fixed",bottom:20,right:20,background:bg,color:"#fff",padding:"12px 20px",borderRadius:12,zIndex:9999,fontSize:13,fontWeight:600,boxShadow:"0 8px 24px rgba(0,0,0,.2)",maxWidth:340,animation:"slideUp .3s ease" }}>{msg}</div>;
 }
 
 function PushPill({ push, onDismiss }) {

@@ -2,7 +2,7 @@
 Actualizado: 2026-11-16 20:58 (hora Argentina) — Fase 1a revisada; el "21:30" que quedó en main por #2 era un error de hora (real: ~20:30)
 Fase actual: 1a — Hotfix
 Rama de trabajo: claude/stoic-ride-yk4por (base: 84494b1)
-PR abierto: ninguno todavía (Fase 1a)
+PR abierto: #3 https://github.com/Consciousnessebooks/turnapp/pull/3 (Fase 1a)
 Último commit verificado: 712cc02 — npm ci, build, humo 10/10, gitleaks del PR y bundle sin claves, exit 0 (.verificacion/712cc02/)
 ## Arranque (terminado 2026-11-16)
 - [x] 1. CLAUDE.md cargado; los 7 subagentes aparecen en la herramienta de agentes

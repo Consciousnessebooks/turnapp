@@ -71,6 +71,14 @@ Martín sube el kit a `main` antes de la primera sesión (guía). Por eso `CLAUD
 ## Registro de decisiones nuevas (Claude Code)
 _(agregá acá, la más nueva arriba)_
 
+### N-10 · 2026-11-16 · Fase 1a: alcance del hotfix
+- Las claves de Supabase salen del código y pasan a `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` (§5.5). La clave legacy embebida ya estaba deshabilitada, así que producción no pierde nada: sin variables, el login muestra "El ingreso no está disponible en este momento". Las variables con la clave publishable nueva se cargan en Vercel cuando la base esté lista (Fase 2/3): hoy, aunque el login anduviera, no hay grants y los nombres no coinciden.
+- Fuera del hotfix (quedan para la 1b): actualizar Vite a una versión mayor por `npm audit` (1 high y 1 moderate, solo del servidor de desarrollo, no del build publicado), el resto de los datos de demo en pantallas y la reestructura.
+- Se agrega `role="status"` al aviso (observación de qa-testing) para que el error sea accesible y el humo lo busque por rol.
+
+### N-09 · 2026-11-16 · PR #2 squash-mergeado; rama de la sesión reutilizada
+#2 entró a la rama principal como 84494b1 (squash). Como la sesión solo puede pushear a `claude/stoic-ride-yk4por` y force push está prohibido, se mergeó la rama principal sobre la rama de la sesión (2997a58) y se aplicó encima el hotfix: el diff del PR contiene solo la Fase 1a. M-14 verificado por API: ruleset `proteger-main` activo, sin bypass, con deletion, non_fast_forward y pull_request (0 aprobaciones). M-03: Martín confirmó el cambio de la contraseña de la base y de Gmail ("listo 1, listo 2", 2026-11-16); no hay forma de verificarlo con solo lectura.
+
 ### N-08 · 2026-11-16 · M-03: secreto JWT legacy revocado (captura de Martín)
 Captura de "Project Settings" → "JWT Keys" → pestaña "JWT Signing Keys": clave "Current" ECC (P-256); "Previously used keys" vacío; en "Revoked keys" la HS256 (Shared Secret), rotada "7 hours ago" al 2026-11-16. Los JWT legacy (anon y service_role) ya no se aceptan. Corrección al pedido: el botón "Migrate JWT secret" no aparece cuando la migración ya está hecha (https://supabase.com/docs/guides/auth/signing-keys, leído 2026-11-16).
 

@@ -3,7 +3,7 @@ Actualizado: 2026-11-16 20:58 (hora Argentina) — Fase 1a revisada; el "21:30" 
 Fase actual: 1a — Hotfix
 Rama de trabajo: claude/stoic-ride-yk4por (base: 84494b1)
 PR abierto: ninguno todavía (Fase 1a)
-Último commit verificado: 17505e7 — npm ci, build, humo 10/10, gitleaks del PR y bundle sin claves, exit 0 (.verificacion/17505e7/)
+Último commit verificado: 712cc02 — npm ci, build, humo 10/10, gitleaks del PR y bundle sin claves, exit 0 (.verificacion/712cc02/)
 ## Arranque (terminado 2026-11-16)
 - [x] 1. CLAUDE.md cargado; los 7 subagentes aparecen en la herramienta de agentes
 - [x] 2. `bash .claude/hooks/probar-guardia.sh` → "TODAS LAS PRUEBAS PASARON (118 casos)", exit 0. `git push origin main` real → "BLOQUEADO por .claude/hooks/guardia.sh: push a main prohibido"
@@ -17,9 +17,10 @@ PR abierto: ninguno todavía (Fase 1a)
 - [x] 1. Login conectado a handleLogin con error controlado; props del panel; Admin cierra sesión; claves desde variables (394f615)
 - [x] 2. Versiones exactas, package-lock.json, @playwright/test 1.63.0, .env.example (414ee71)
 - [x] 3. e2e/humo.spec.ts (qa-testing) en 360 y 1280: 10 passed, exit 0 (17505e7)
-- [ ] 4. Puerta de revisión y PR "Fase 1a — Hotfix"  ← PRÓXIMO
+- [x] 4. Puerta de revisión: revisor-codigo, qa-testing, frontend-ux y auditor-seguridad APROBADO (712cc02)
+- [ ] 5. PR "Fase 1a — Hotfix" y merge de Martín  ← PRÓXIMO
 ## Próximo paso
-Revisión (revisor-codigo, qa-testing, frontend-ux, auditor-seguridad) y abrir el PR de la Fase 1a.
+Abrir el PR de la Fase 1a y esperar el merge; después, Fase 1b.
 ## Esperando a Martín
 - Decisiones: "Reconstruir" o "Adoptar"; nombre de dominio; si las cuentas y los 5 pacientes son de prueba
 ## Decisiones pendientes de Martín

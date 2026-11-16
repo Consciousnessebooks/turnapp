@@ -3,9 +3,11 @@ import { Calendar, Users, DollarSign, XCircle, Clock, Bell, Search, Filter, Chev
 import { createClient } from '@supabase/supabase-js';
 
 // ─── SUPABASE CLIENT ───
-const supabaseUrl = 'https://hszobstcatbyzijbdnpv.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhzem9ic3RjYXRieXppamJkbnB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MzY0NDQsImV4cCI6MjA4OTAxMjQ0NH0.Jl0KNbT40lS3ybc8sPPfZVkhnPdTZPNXXpG9xlP5Ybc';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Sin variables (previews, build local) la app no se conecta y el login muestra un error controlado.
+const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
+const MSG_SIN_CONEXION = "El ingreso no está disponible en este momento. Probá de nuevo más tarde.";
 
 
 const FREQ_L = { semanal:"Semanal",quincenal:"Quincenal",mensual:"Mensual",bimestral:"Bimestral",trimestral:"Trimestral" };
@@ -105,6 +107,7 @@ export default function App() {
 
   // Check session on mount
   useEffect(() => {
+    if (!supabase) return undefined;
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         setUser(session.user);
@@ -153,6 +156,9 @@ export default function App() {
         loadProfessionalData(profData.id);
         return;
       }
+
+      notify("Tu usuario todavía no tiene acceso. Escribile al administrador.", "error");
+      await supabase.auth.signOut();
     } catch (error) {
       console.error('Error checking role:', error);
     }
@@ -220,20 +226,22 @@ export default function App() {
   };
 
   const handleLogin = async (email, password) => {
+    if (!supabase) { notify(MSG_SIN_CONEXION, 'error'); return; }
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       notify('Sesión iniciada');
     } catch (error) {
-      notify(error.message, 'error');
+      console.warn('Ingreso fallido:', error?.status ?? 'sin código');
+      notify(error?.status === 400 ? 'Email o contraseña incorrectos.' : MSG_SIN_CONEXION, 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    if (supabase) await supabase.auth.signOut();
     setScreen('landing');
     setUserRole(null);
     setProfessionalId(null);
@@ -361,10 +369,13 @@ export default function App() {
           onEditPatient={handleEditPatient}
           onDeletePatient={handleDeletePatient}
           onGenerateAppointments={handleGenerateAppointments}
+          setAppts={setAppts}
+          setPatients={setPatients}
+          onPatient={goPatient}
           loading={loading}
         />
       )}
-      {screen==="admin" && <Admin onLogout={()=>setScreen("landing")} notify={notify} />}
+      {screen==="admin" && <Admin onLogout={handleLogout} notify={notify} />}
       {screen==="patient" && <Patient pid={patientPortalId} patients={patients} setPatients={setPatients} appts={appts} setAppts={setAppts} notify={notify} pushNotify={pushNotify} onBack={goBack} />}
       <Toast msg={toast?.msg} type={toast?.type} />
       <PushPill push={push} onDismiss={()=>setPush(null)} />
@@ -430,9 +441,11 @@ function Landing({ onLogin }) {
 // ═══════════════════════════════════════════════
 // LOGIN
 // ═══════════════════════════════════════════════
-function Login({ role, onSuccess, onBack }) {
-  const [loading, setLoading] = useState(false);
+function Login({ role, onLogin, onBack, loading }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const isAdmin = role==="admin";
+  const submit = (e) => { e.preventDefault(); if (!loading) onLogin(email.trim(), password); };
   return (
     <div style={{ minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:24 }}>
       <div style={{ width:"100%",maxWidth:400,animation:"fadeUp .4s ease" }}>
@@ -442,21 +455,21 @@ function Login({ role, onSuccess, onBack }) {
             {isAdmin ? <Shield size={24} color="#fff"/> : <Calendar size={24} color="#fff"/>}
           </div>
           <h2 style={{ fontSize:22,fontWeight:800 }}>{isAdmin?"Super Admin":"Panel Profesional"}</h2>
-          <p style={{ color:"#64748b",fontSize:13,marginTop:4 }}>Demo — ingreso sin registro</p>
+          <p style={{ color:"#64748b",fontSize:13,marginTop:4 }}>Ingresá con tu email y contraseña</p>
         </div>
-        <div style={{ background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:18,padding:24 }}>
+        <form onSubmit={submit} style={{ background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:18,padding:24 }}>
           <div style={{ marginBottom:14 }}>
-            <label style={{ fontSize:12,fontWeight:600,color:"#64748b",display:"block",marginBottom:5 }}>Email</label>
-            <input defaultValue={isAdmin?"admin@turnapp.ar":"dra.garcia@turnapp.ar"} style={{ width:"100%",padding:"11px 14px",background:"#0f172a",border:"1px solid #1e293b",borderRadius:10,color:"#f1f5f9",fontSize:14,fontFamily:"inherit",boxSizing:"border-box" }} />
+            <label htmlFor="login-email" style={{ fontSize:12,fontWeight:600,color:"#64748b",display:"block",marginBottom:5 }}>Email</label>
+            <input id="login-email" type="email" autoComplete="username" required value={email} onChange={e=>setEmail(e.target.value)} style={{ width:"100%",padding:"11px 14px",background:"#0f172a",border:"1px solid #1e293b",borderRadius:10,color:"#f1f5f9",fontSize:14,fontFamily:"inherit",boxSizing:"border-box" }} />
           </div>
           <div style={{ marginBottom:20 }}>
-            <label style={{ fontSize:12,fontWeight:600,color:"#64748b",display:"block",marginBottom:5 }}>Contraseña</label>
-            <input type="password" defaultValue="demo1234" style={{ width:"100%",padding:"11px 14px",background:"#0f172a",border:"1px solid #1e293b",borderRadius:10,color:"#f1f5f9",fontSize:14,fontFamily:"inherit",boxSizing:"border-box" }} />
+            <label htmlFor="login-clave" style={{ fontSize:12,fontWeight:600,color:"#64748b",display:"block",marginBottom:5 }}>Contraseña</label>
+            <input id="login-clave" type="password" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)} style={{ width:"100%",padding:"11px 14px",background:"#0f172a",border:"1px solid #1e293b",borderRadius:10,color:"#f1f5f9",fontSize:14,fontFamily:"inherit",boxSizing:"border-box" }} />
           </div>
-          <button onClick={()=>{setLoading(true);setTimeout(()=>{setLoading(false);onSuccess();},600);}} disabled={loading} style={{ width:"100%",padding:"12px",background:isAdmin?"linear-gradient(135deg,#7c3aed,#6d28d9)":"linear-gradient(135deg,#0891b2,#0e7490)",color:"#fff",border:"none",borderRadius:10,fontWeight:700,cursor:"pointer",fontSize:14,fontFamily:"inherit",opacity:loading?.7:1 }}>
+          <button type="submit" disabled={loading} style={{ width:"100%",padding:"12px",background:isAdmin?"linear-gradient(135deg,#7c3aed,#6d28d9)":"linear-gradient(135deg,#0891b2,#0e7490)",color:"#fff",border:"none",borderRadius:10,fontWeight:700,cursor:"pointer",fontSize:14,fontFamily:"inherit",opacity:loading?.7:1 }}>
             {loading ? "Verificando..." : "Ingresar"}
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
@@ -465,7 +478,7 @@ function Login({ role, onSuccess, onBack }) {
 // ═══════════════════════════════════════════════
 // PROFESSIONAL PANEL
 // ═══════════════════════════════════════════════
-function Professional({ appts, patients, onLogout, notify, pushNotify, onAddPatient, onEditPatient, onDeletePatient, onGenerateAppointments, loading }) {
+function Professional({ appts, patients, onLogout, notify, pushNotify, onAddPatient, onEditPatient, onDeletePatient, onGenerateAppointments, setAppts, setPatients, onPatient, loading }) {
   const [tab, setTab] = useState("hoy");
   const [selDay, setSelDay] = useState(new Date());
   const [search, setSearch] = useState("");
@@ -528,12 +541,9 @@ function Professional({ appts, patients, onLogout, notify, pushNotify, onAddPati
     const token = `tok-${Math.random().toString(36).slice(2,10)}`;
     const created = { ...pat, id: newId, token, active: true };
     setPatients(prev => [...prev, created]);
-    // Regenerate appointments including the new patient
-    const now = new Date();
-    setAppts(genAppts([...patients, created], now.getFullYear(), now.getMonth()));
     setNewPat(null);
     pushNotify("Paciente agregado", `${pat.name} — ${FREQ_L[pat.freq]} · ${DAYS[pat.day]} ${pat.hour}`);
-    notify(`${pat.name} agregado. Turnos generados automáticamente.`);
+    notify(`${pat.name} agregado.`);
   };
 
   const sendReminders = () => {

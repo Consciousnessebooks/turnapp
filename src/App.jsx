@@ -6,7 +6,19 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 // Sin variables (previews, build local) la app no se conecta y el login muestra un error controlado.
-const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
+// Una clave secreta nunca va en el frontend: si llega por error, no se crea el cliente.
+const claveEsSecreta = (k) => !!k && (k.startsWith("sb_secret_") || /"role"\s*:\s*"service_role"/.test((() => { try { return atob(k.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")); } catch { return ""; } })()));
+const supabase = supabaseUrl && supabaseAnonKey && !claveEsSecreta(supabaseAnonKey) ? createClient(supabaseUrl, supabaseAnonKey) : null;
+// Cierra la sesión en el servidor y, si falla (red o 5xx), igual la borra de este dispositivo.
+const cerrarSesion = async () => {
+  if (!supabase) return;
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) await supabase.auth.signOut({ scope: "local" });
+  } catch {
+    await supabase.auth.signOut({ scope: "local" }).catch(() => {});
+  }
+};
 const MSG_SIN_CONEXION = "El ingreso no está disponible en este momento. Probá de nuevo más tarde.";
 
 
@@ -154,7 +166,7 @@ export default function App() {
       }
 
       notify("Tu usuario todavía no tiene acceso. Escribile al administrador.", "error");
-      await supabase.auth.signOut();
+      await cerrarSesion();
     } catch (error) {
       // Error de red o de permisos: no es "sin acceso", así que no se cierra la sesión.
       console.warn('No se pudo verificar el rol:', error?.code ?? 'sin código');
@@ -239,7 +251,7 @@ export default function App() {
   };
 
   const handleLogout = async () => {
-    if (supabase) await supabase.auth.signOut();
+    await cerrarSesion();
     setScreen('landing');
     setUserRole(null);
     setProfessionalId(null);

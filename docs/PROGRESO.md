@@ -1,26 +1,44 @@
 # PROGRESO — TURNAPP
-Actualizado: 2026-11-13 00:00 (hora Argentina) — plantilla inicial del kit; la primera sesión la reemplaza
-Fase actual: Arranque
-Rama de trabajo: main (base: main@<sha al empezar>)
-PR abierto: ninguno
-Último commit verificado: ninguno — todavía no se corrió nada
+Actualizado: 2026-11-16 21:30 (hora Argentina) — Fase 0 hecha, en revisión
+Fase actual: 0 — Diagnóstico
+Rama de trabajo: claude/stoic-ride-yk4por (base: main@310c1f9)
+PR abierto: #2 https://github.com/Consciousnessebooks/turnapp/pull/2 (Fase 0)
+Último commit verificado: 6110bb5 — Fase 0 (diagnóstico), evidencia en .verificacion/6110bb5/
+## Arranque (terminado 2026-11-16)
+- [x] 1. CLAUDE.md cargado; los 7 subagentes aparecen en la herramienta de agentes
+- [x] 2. `bash .claude/hooks/probar-guardia.sh` → "TODAS LAS PRUEBAS PASARON (118 casos)", exit 0. `git push origin main` real → "BLOQUEADO por .claude/hooks/guardia.sh: push a main prohibido"
+- [x] 3. YAML de los 7 `.claude/agents/*.md` válido (name, description, tools, model) con python3 + yaml, exit 0
+- [x] 4. Repo público (owner User), `main` sin protección (404 "Branch not protected"), rulesets `[]` → modo A, M-14 variante A. Push de `.github/workflows/` permitido (4413979, borrado en 7fd26a7). API de environments: 403 del proxy (NO VERIFICADO)
+- [x] 5. Entorno: node v22.23.4, npm 10.9.9, Docker OK (`docker run --rm hello-world` exit 0), supabase CLI 3.2.0 por npm OK, psql presente, gitleaks no instalado. HTTP: registry.npmjs.org 200, hszobstcatbyzijbdnpv.supabase.co/rest/v1/ 401 (esperado sin clave), cdn.playwright.dev 400, developer.mozilla.org 302, fcm.googleapis.com 404, turnapp-4typ.vercel.app 200. Consulta de solo lectura `select 1 as ok` → HTTP 201 `[{"ok":1}]`
+- [x] 6. Pedido pendiente: M-14 variante A (se manda con el informe de Fase 0). M-01 completo.
 ## Checklist de la fase
-- [ ] 1. Confirmar que CLAUDE.md está entre las instrucciones cargadas y que aparecen los 7 subagentes (arquitecto-supabase, auditor-seguridad, especialista-pwa-push, frontend-ux, qa-testing, revisor-codigo, producto-negocio)  ← PRÓXIMO
-- [ ] 2. `bash .claude/hooks/probar-guardia.sh` → "TODAS LAS PRUEBAS PASARON"; un intento real de push a main desde una rama local de prueba queda "BLOQUEADO por .claude/hooks/guardia.sh"
-- [ ] 3. Validar el frontmatter YAML de `.claude/agents/*.md` con python3 + yaml (name, description, tools, model)
-- [ ] 4. Detectar visibilidad, plan y protección del repo (ESPECIFICACION §5.3) y anotar el modo de despliegue (A o M) en DECISIONES.md
-- [ ] 5. Diagnóstico del entorno (ESPECIFICACION §9, Arranque, paso 5): node, npm, Docker, supabase CLI, red, consulta de solo lectura
-- [ ] 6. Mandar a Martín los pedidos que falten (M-14 según el caso, M-01 incompleto) y seguir con la Fase 0 en una rama nueva
+- [x] 1. docs/BACKLOG.md, docs/TESTS.md (8 reglas + flujos), docs/MANUAL-OPERACION.md creados
+- [x] 2. Repo leído: un solo src/App.jsx (1182 líneas); no existe App-MINIMAL.jsx; sin lockfile; sin config de Vercel en el repo
+- [x] 3. `npm ci` exit 1 (sin lockfile, diagnóstico) · `npm install` exit 0 · `npm run build` exit 0 → `index-DAN7R_GO.js 440.38 kB` (mismo hash que producción)
+- [x] 4. Crash reproducido con Playwright en local y producción: `e is not a function` → sourcemap src/App.jsx:456 `onSuccess` (App pasa `onLogin`, línea 352). CSP/eval: extensión del navegador (producción no manda CSP)
+- [x] 5. gitleaks v8.21.2 (Docker) exit 1, 3 hallazgos (detalle solo en el chat). Bundle de producción: solo JWT `anon`. Claves legacy deshabilitadas (API: "Legacy API keys are disabled")
+- [x] 6. Introspección §13.1 por la consulta de solo lectura (HTTP 201); cron.job no existe (pg_cron ausente); versión commiteable en docs/diagnostico/esquema-2026-11-16.json
+- [x] 7. Real vs. esperado en DIAGNOSTICO §6; fixture aplica en postgres:17.6 (11 tablas, 2 vistas, 9 políticas, 5 funciones)
+- [x] 8. Conteo exacto: 2 profesionales, 5 pacientes, 16 turnos (abril 2026), 1 super_admin
+- [x] 9. Recomendación: reconstruir (DECISIONES N-04)
+- [x] 10. Dominio: miturnapp.com.ar libre por RDAP; NIC ARS 8.500/año (NO VERIFICADO en nic.ar directo); hosting Cloudflare Workers
+- [x] 11. Puerta de revisión: los 5 subagentes APROBADO (62c83c8); PR #2 abierto
+- [ ] 12. Merge de Martín → subir la Fase 1a  ← PRÓXIMO
 ## Próximo paso
-Confirmar el paso 1 y seguir la checklist en orden; al terminar el paso 6, crear la rama `fase-0-diagnostico` desde origin/main, mover este archivo a la checklist de la Fase 0 (ESPECIFICACION §9) y pushear.
+Esperar el merge de #2. La Fase 1a (hotfix) está lista en la rama local `fase-1a-hotfix-local` (commit cb3c62d) y se sube a `claude/stoic-ride-yk4por` cuando se mergee la Fase 0 (el entorno no permite pushear otra rama).
 ## Esperando a Martín
-- (nada todavía)
+- M-14 variante A (proteger `main` con un ruleset)
+- M-03: secreto JWT legacy REVOCADO (captura de Martín, 2026-11-16: HS256 en "Revoked keys", clave actual ECC P-256). Quedan los demás pasos de seguridad (detalle en el chat)
+- Confirmar si las cuentas y los 5 pacientes son de prueba (detalle en el chat)
+- Decisiones: "Reconstruir" o "Adoptar"; nombre de dominio
 ## Decisiones pendientes de Martín
 - Adoptar o reconstruir la base (se pregunta en el informe de Fase 0)
 - Dominio a comprar (se propone en el informe de Fase 0)
-- Si el repo es privado y gratuito: hacerlo público o mantenerlo privado (modo M)
 - Profesional piloto (se pregunta en la Puerta del piloto, M-16)
 ## Problemas conocidos e intentos fallidos
-- (nada todavía)
+- La sesión solo puede pushear a `claude/stoic-ride-yk4por` (restricción del entorno): la Fase 0 usa esa rama en vez de `fase-0-diagnostico` (ver DECISIONES).
+- La API REST `repos/.../environments` responde 403 desde el proxy de la sesión: no se puede leer qué entornos hay.
+- Un comando de Bash que mezcla un GET a `*.supabase.co` con un POST cualquiera lo bloquea la guarda: separar los comandos.
 ## Historial (una línea por sesión, la más nueva arriba)
+- 2026-11-16 — Arranque completo (guarda, agentes, repo público → modo A, entorno con Docker y consulta read-only OK); empieza Fase 0
 - 2026-11-13 — kit subido por Martín a main

@@ -5,7 +5,7 @@ Formato de cada decisión: contexto, decisión, alternativas descartadas, cómo 
 ## Decisiones de Martín (13/11/2026)
 
 ### D-01 · Repo público o privado: lo detecta Claude Code
-Martín no sabe la visibilidad del repo. En la primera sesión, Claude Code la detecta con la API REST de GitHub (solo lectura), junto con lo que permite el plan (protección de rama, rulesets, entornos con secretos), y aplica la protección y el modo de despliegue correspondientes (ESPECIFICACION §5.3). Si hace falta algo de Martín, se lo pide con clics exactos (M-14, M-05). Resultado de la detección: _(lo completa la primera sesión)_.
+Martín no sabe la visibilidad del repo. En la primera sesión, Claude Code la detecta con la API REST de GitHub (solo lectura), junto con lo que permite el plan (protección de rama, rulesets, entornos con secretos), y aplica la protección y el modo de despliegue correspondientes (ESPECIFICACION §5.3). Si hace falta algo de Martín, se lo pide con clics exactos (M-14, M-05). Resultado de la detección (2026-11-16, `gh api repos/Consciousnessebooks/turnapp`): **público**, dueño de tipo User, rama por defecto `main`; `branches/main/protection` → 404 "Branch not protected" (protección disponible y sin activar); `rulesets` → `[]`. Por §5.3: **modo A (automático)** y **M-14 variante A** (ruleset `proteger-main`). Por ser público, los riesgos de seguridad de la Fase 0 van solo en el chat.
 
 ### D-02 · Dominio propio: SÍ (única excepción al costo $0)
 Claude Code verifica precio y requisitos vigentes (.com.ar en NIC Argentina y alternativas) y le da a Martín los pasos exactos para comprarlo. Hosting gratuito que permita uso comercial y dominio propio. El origen definitivo (`https://app.<dominio>`) queda listo antes de que el primer paciente instale la PWA o active avisos (Fase 1c, antes de la Fase 5). Por qué `app.`: el origen de la PWA queda fijo para siempre y el dominio raíz queda libre para un sitio comercial. Dominio elegido: _(pendiente, informe de Fase 0)_.
@@ -70,3 +70,38 @@ Martín sube el kit a `main` antes de la primera sesión (guía). Por eso `CLAUD
 
 ## Registro de decisiones nuevas (Claude Code)
 _(agregá acá, la más nueva arriba)_
+
+### N-08 · 2026-11-16 · M-03: secreto JWT legacy revocado (captura de Martín)
+Captura de "Project Settings" → "JWT Keys" → pestaña "JWT Signing Keys": clave "Current" ECC (P-256); "Previously used keys" vacío; en "Revoked keys" la HS256 (Shared Secret), rotada "7 hours ago" al 2026-11-16. Los JWT legacy (anon y service_role) ya no se aceptan. Corrección al pedido: el botón "Migrate JWT secret" no aparece cuando la migración ya está hecha (https://supabase.com/docs/guides/auth/signing-keys, leído 2026-11-16).
+
+### N-07 · 2026-11-16 · Fixture de producción: ubicación y EXECUTE de funciones
+- Se mantiene en `supabase/tests/fixtures/` (lo pide §5.4). NO VERIFICADO si `npx supabase test db` toma `.sql` de subcarpetas de `supabase/tests/`: se comprueba al empezar la Fase 2; si los toma, se mueve a `supabase/fixtures/` (observación de auditor-seguridad).
+- El fixture revoca grants de tablas y privilegios por defecto (producción no tiene), pero deja EXECUTE de funciones para PUBLIC porque así está en producción (arquitecto-supabase). auditor-seguridad proponía revocarlo; se prioriza que la réplica sea fiel. Se corrige en la reconstrucción.
+
+### N-06 · 2026-11-16 · Qué se publica del diagnóstico (repo público)
+Contexto: revisor-codigo pidió no publicar riesgos ni datos para apuntar a cuentas; arquitecto-supabase pidió más detalle estructural. Decisión: en el repo quedan los hechos de estructura (los exige §9 Fase 0 y el fixture los contiene de todos modos) sin valoraciones de riesgo; la introspección versionada se redacta (sin `execute_*`, `security_definer`, `rls`, `config`, `opciones`, `acl` ni privilegios); UUIDs de Auth, dominios de email y sospechas de cuentas van solo al chat. El commit 13b2e09 ya publicó los UUID de los 3 usuarios: no son secretos y no se reescribe el historial (force push prohibido).
+
+### N-05 · 2026-11-16 · `.verificacion/` en .gitignore
+CLAUDE.md asume que `.verificacion/` está ignorado y no lo estaba. Se agrega la línea en la Fase 0 (único cambio fuera de `docs/` y `supabase/tests/fixtures/`, sin efecto en build ni producción).
+
+### N-04 · 2026-11-16 · Recomendación de base: reconstruir (pendiente del "Reconstruir" de Martín)
+Contexto: conteo exacto 2 profesionales, 5 pacientes, 16 turnos de abril 2026 (a confirmar por Martín que son de prueba); el modelo de frecuencias, las fechas sin zona y la falta de integridad de tenant obligan a rehacer casi todo. Decisión propuesta: reconstruir `public` con drops explícitos del inventario de DIAGNOSTICO §9 (§5.4). Alternativa descartada: adoptar (solo si hay pacientes reales, con la migración de §3.13). Verificación: DIAGNOSTICO.md §6–§9.
+
+### N-03 · 2026-11-16 · Dominio y hosting (datos [VERIFICAR])
+- Disponibilidad por RDAP oficial de NIC Argentina, `https://rdap.nic.ar/domain/<nombre>` (consultado 2026-11-16): turnapp.com.ar, turnapp.ar y turnosapp.com.ar registrados; turnappsalud.com.ar y miturnapp.com.ar libres (404).
+- Arancel NIC: ARS 8.500/año .com.ar y ARS 25.500/año .ar, según búsqueda web que cita `https://nic.ar/es/dominios/aranceles` (2026-11-16). nic.ar no responde desde la sesión: NO VERIFICADO en la fuente directa; Martín lo ve en la pantalla de pago.
+- Requisitos NIC: CUIT/CUIL y Clave Fiscal nivel 2 o superior, por TAD. Fuente: búsqueda web (tiendanube.com/blog/como-registrar-dominio-com-ar-en-nic, 2026-11-16). NO VERIFICADO en nic.ar.
+- Cloudflare Workers: "Requests to static assets are free and unlimited" y plan Free por defecto, `https://developers.cloudflare.com/workers/platform/pricing/index.md` (leído 2026-11-16). `https://www.cloudflare.com/terms/` (leído 2026-11-16): sin cláusula de uso personal o no comercial.
+- Vercel Hobby: "restricted to non-commercial personal use only", `https://vercel.com/docs/limits/fair-use-guidelines` (búsqueda web 2026-11-16).
+Decisión propuesta: miturnapp.com.ar en NIC (Martín elige el nombre; turnappsalud.com.ar queda como alternativa: "salud" en el origen revela el tipo de servicio en teléfonos compartidos, observación de producto-negocio), DNS en Cloudflare, hosting Cloudflare Workers con assets estáticos.
+
+### N-02 · 2026-11-16 · Rama de trabajo de la sesión
+Contexto: CLAUDE.md pide ramas `fase-<id>-<tema>`, pero el entorno de esta sesión solo permite pushear a `claude/stoic-ride-yk4por`. Decisión: la Fase 0 vive en `claude/stoic-ride-yk4por` (creada desde `origin/main` 310c1f9) y su PR sale de ahí. Fases siguientes: rama propia si el entorno lo permite; si no, la rama de la sesión correspondiente. Alternativa descartada: pushear a otra rama sin permiso del entorno. Verificación: `git push -u origin claude/stoic-ride-yk4por` funcionó.
+
+### N-01 · 2026-11-16 · Diagnóstico del entorno del Arranque
+- Workflows: se pueden pushear archivos en `.github/workflows/` (commit 4413979 con un workflow `workflow_dispatch` inofensivo, borrado en 7fd26a7). No hace falta `docs/ci/`.
+- Docker funciona (`sudo dockerd`, `docker run --rm hello-world` exit 0): el stack local de Supabase es evidencia válida.
+- CLI de Supabase: `supabase@3.2.0` por npm descarga el binario sin problemas (probado en el scratchpad); se va a fijar como devDependency exacta en la Fase 1b/2.
+- gitleaks no está instalado: plan, imagen Docker oficial con tag exacto.
+- `repos/.../environments` da 403 desde el proxy de la sesión: NO VERIFICADO qué entornos existen; se confirma con Martín en M-05 (Fase 2d).
+- Consulta de solo lectura a producción: OK (HTTP 201, `[{"ok":1}]`). No hace falta M-04.

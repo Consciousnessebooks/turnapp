@@ -5,7 +5,7 @@ Formato de cada decisión: contexto, decisión, alternativas descartadas, cómo 
 ## Decisiones de Martín (13/11/2026)
 
 ### D-01 · Repo público o privado: lo detecta Claude Code
-Martín no sabe la visibilidad del repo. En la primera sesión, Claude Code la detecta con la API REST de GitHub (solo lectura), junto con lo que permite el plan (protección de rama, rulesets, entornos con secretos), y aplica la protección y el modo de despliegue correspondientes (ESPECIFICACION §5.3). Si hace falta algo de Martín, se lo pide con clics exactos (M-14, M-05). Resultado de la detección: _(lo completa la primera sesión)_.
+Martín no sabe la visibilidad del repo. En la primera sesión, Claude Code la detecta con la API REST de GitHub (solo lectura), junto con lo que permite el plan (protección de rama, rulesets, entornos con secretos), y aplica la protección y el modo de despliegue correspondientes (ESPECIFICACION §5.3). Si hace falta algo de Martín, se lo pide con clics exactos (M-14, M-05). Resultado de la detección (2026-11-16, `gh api repos/Consciousnessebooks/turnapp`): **público**, dueño de tipo User, rama por defecto `main`; `branches/main/protection` → 404 "Branch not protected" (protección disponible y sin activar); `rulesets` → `[]`. Por §5.3: **modo A (automático)** y **M-14 variante A** (ruleset `proteger-main`). Por ser público, los riesgos de seguridad de la Fase 0 van solo en el chat.
 
 ### D-02 · Dominio propio: SÍ (única excepción al costo $0)
 Claude Code verifica precio y requisitos vigentes (.com.ar en NIC Argentina y alternativas) y le da a Martín los pasos exactos para comprarlo. Hosting gratuito que permita uso comercial y dominio propio. El origen definitivo (`https://app.<dominio>`) queda listo antes de que el primer paciente instale la PWA o active avisos (Fase 1c, antes de la Fase 5). Por qué `app.`: el origen de la PWA queda fijo para siempre y el dominio raíz queda libre para un sitio comercial. Dominio elegido: _(pendiente, informe de Fase 0)_.
@@ -70,3 +70,14 @@ Martín sube el kit a `main` antes de la primera sesión (guía). Por eso `CLAUD
 
 ## Registro de decisiones nuevas (Claude Code)
 _(agregá acá, la más nueva arriba)_
+
+### N-02 · 2026-11-16 · Rama de trabajo de la sesión
+Contexto: CLAUDE.md pide ramas `fase-<id>-<tema>`, pero el entorno de esta sesión solo permite pushear a `claude/stoic-ride-yk4por`. Decisión: la Fase 0 vive en `claude/stoic-ride-yk4por` (creada desde `origin/main` 310c1f9) y su PR sale de ahí. Fases siguientes: rama propia si el entorno lo permite; si no, la rama de la sesión correspondiente. Alternativa descartada: pushear a otra rama sin permiso del entorno. Verificación: `git push -u origin claude/stoic-ride-yk4por` funcionó.
+
+### N-01 · 2026-11-16 · Diagnóstico del entorno del Arranque
+- Workflows: se pueden pushear archivos en `.github/workflows/` (commit 4413979 con un workflow `workflow_dispatch` inofensivo, borrado en 7fd26a7). No hace falta `docs/ci/`.
+- Docker funciona (`sudo dockerd`, `docker run --rm hello-world` exit 0): el stack local de Supabase es evidencia válida.
+- CLI de Supabase: `supabase@3.2.0` por npm descarga el binario sin problemas (probado en el scratchpad); se va a fijar como devDependency exacta en la Fase 1b/2.
+- gitleaks no está instalado: plan, imagen Docker oficial con tag exacto.
+- `repos/.../environments` da 403 desde el proxy de la sesión: NO VERIFICADO qué entornos existen; se confirma con Martín en M-05 (Fase 2d).
+- Consulta de solo lectura a producción: OK (HTTP 201, `[{"ok":1}]`). No hace falta M-04.

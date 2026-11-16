@@ -83,7 +83,7 @@ Contexto: conteo exacto 2 profesionales (ambos `@test`), 5 pacientes, 16 turnos 
 - Requisitos NIC: CUIT/CUIL y Clave Fiscal nivel 2 o superior, por TAD. Fuente: búsqueda web (tiendanube.com/blog/como-registrar-dominio-com-ar-en-nic, 2026-11-16). NO VERIFICADO en nic.ar.
 - Cloudflare Workers: "Requests to static assets are free and unlimited" y plan Free por defecto, `https://developers.cloudflare.com/workers/platform/pricing/index.md` (leído 2026-11-16). `https://www.cloudflare.com/terms/` (leído 2026-11-16): sin cláusula de uso personal o no comercial.
 - Vercel Hobby: "restricted to non-commercial personal use only", `https://vercel.com/docs/limits/fair-use-guidelines` (búsqueda web 2026-11-16).
-Decisión propuesta: turnappsalud.com.ar en NIC (Martín elige el nombre), DNS en Cloudflare, hosting Cloudflare Workers con assets estáticos.
+Decisión propuesta: miturnapp.com.ar en NIC (Martín elige el nombre; turnappsalud.com.ar queda como alternativa: "salud" en el origen revela el tipo de servicio en teléfonos compartidos, observación de producto-negocio), DNS en Cloudflare, hosting Cloudflare Workers con assets estáticos.
 
 ### N-02 · 2026-11-16 · Rama de trabajo de la sesión
 Contexto: CLAUDE.md pide ramas `fase-<id>-<tema>`, pero el entorno de esta sesión solo permite pushear a `claude/stoic-ride-yk4por`. Decisión: la Fase 0 vive en `claude/stoic-ride-yk4por` (creada desde `origin/main` 310c1f9) y su PR sale de ahí. Fases siguientes: rama propia si el entorno lo permite; si no, la rama de la sesión correspondiente. Alternativa descartada: pushear a otra rama sin permiso del entorno. Verificación: `git push -u origin claude/stoic-ride-yk4por` funcionó.

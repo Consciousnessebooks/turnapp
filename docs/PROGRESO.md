@@ -1,9 +1,9 @@
 # PROGRESO — TURNAPP
-Actualizado: 2026-11-16 20:30 (hora Argentina) — Arranque terminado; empieza Fase 0
+Actualizado: 2026-11-16 21:30 (hora Argentina) — Fase 0 hecha, en revisión
 Fase actual: 0 — Diagnóstico
 Rama de trabajo: claude/stoic-ride-yk4por (base: main@310c1f9)
 PR abierto: ninguno
-Último commit verificado: 7fd26a7 — Arranque (guarda, agentes, repo, entorno)
+Último commit verificado: 13b2e09 — Fase 0 (diagnóstico)
 ## Arranque (terminado 2026-11-16)
 - [x] 1. CLAUDE.md cargado; los 7 subagentes aparecen en la herramienta de agentes
 - [x] 2. `bash .claude/hooks/probar-guardia.sh` → "TODAS LAS PRUEBAS PASARON (118 casos)", exit 0. `git push origin main` real → "BLOQUEADO por .claude/hooks/guardia.sh: push a main prohibido"
@@ -12,21 +12,24 @@ PR abierto: ninguno
 - [x] 5. Entorno: node v22.23.4, npm 10.9.9, Docker OK (`docker run --rm hello-world` exit 0), supabase CLI 3.2.0 por npm OK, psql presente, gitleaks no instalado. HTTP: registry.npmjs.org 200, hszobstcatbyzijbdnpv.supabase.co/rest/v1/ 401 (esperado sin clave), cdn.playwright.dev 400, developer.mozilla.org 302, fcm.googleapis.com 404, turnapp-4typ.vercel.app 200. Consulta de solo lectura `select 1 as ok` → HTTP 201 `[{"ok":1}]`
 - [x] 6. Pedido pendiente: M-14 variante A (se manda con el informe de Fase 0). M-01 completo.
 ## Checklist de la fase
-- [ ] 1. Crear docs/BACKLOG.md, docs/TESTS.md, docs/MANUAL-OPERACION.md  ← PRÓXIMO
-- [ ] 2. Leer el repo completo (App.jsx, App-MINIMAL, package.json, lockfile, vite, manifest, Vercel)
-- [ ] 3. `npm install` (no hay lockfile) y `npm run build`
-- [ ] 4. Reproducir el crash con `vite preview` + Playwright; causa raíz con archivo y línea; origen del aviso de CSP/eval
-- [ ] 5. Seguridad de claves: gitleaks sobre todo el historial, JWT del bundle de producción, claves embebidas
-- [ ] 6. Introspección §13.1 → .verificacion/diagnostico/ + versión redactada
-- [ ] 7. Real vs. esperado; puertas traseras; supabase/tests/fixtures/esquema-produccion.sql
-- [ ] 8. Conteo exacto de pacientes y turnos
-- [ ] 9. Recomendación adoptar o reconstruir
-- [ ] 10. Dominio y hosting con precios verificados
-- [ ] 11. docs/DIAGNOSTICO.md e informe para Martín; PR "Fase 0 — Diagnóstico"
+- [x] 1. docs/BACKLOG.md, docs/TESTS.md (8 reglas + flujos), docs/MANUAL-OPERACION.md creados
+- [x] 2. Repo leído: un solo src/App.jsx (1182 líneas); no existe App-MINIMAL.jsx; sin lockfile; sin config de Vercel en el repo
+- [x] 3. `npm ci` exit 1 (sin lockfile, diagnóstico) · `npm install` exit 0 · `npm run build` exit 0 → `index-DAN7R_GO.js 440.38 kB` (mismo hash que producción)
+- [x] 4. Crash reproducido con Playwright en local y producción: `e is not a function` → sourcemap src/App.jsx:456 `onSuccess` (App pasa `onLogin`, línea 352). CSP/eval: extensión del navegador (producción no manda CSP)
+- [x] 5. gitleaks v8.21.2 (Docker) exit 1, 3 hallazgos (detalle solo en el chat). Bundle de producción: solo JWT `anon`. Claves legacy deshabilitadas (API: "Legacy API keys are disabled")
+- [x] 6. Introspección §13.1 por la consulta de solo lectura (HTTP 201); cron.job no existe (pg_cron ausente); versión commiteable en docs/diagnostico/esquema-2026-11-16.json
+- [x] 7. Real vs. esperado en DIAGNOSTICO §6; puerta trasera posible: usuario2 (a confirmar); fixture aplica en postgres:17.6 (11 tablas, 2 vistas, 9 políticas, 5 funciones)
+- [x] 8. Conteo exacto: 2 profesionales, 5 pacientes, 16 turnos (abril 2026), 1 super_admin
+- [x] 9. Recomendación: reconstruir (DECISIONES N-04)
+- [x] 10. Dominio: miturnapp.com.ar libre por RDAP; NIC ARS 8.500/año (NO VERIFICADO en nic.ar directo); hosting Cloudflare Workers
+- [ ] 11. Puerta de revisión y PR "Fase 0 — Diagnóstico"  ← PRÓXIMO
 ## Próximo paso
-Paso 1 de la Fase 0 y seguir en orden.
+Cerrar la puerta de revisión, abrir el PR de Fase 0 y mandar el informe a Martín. La Fase 1a (hotfix) está lista en la rama local `fase-1a-hotfix-local` (commit cb3c62d) y se sube a `claude/stoic-ride-yk4por` cuando se mergee la Fase 0 (el entorno no permite pushear otra rama).
 ## Esperando a Martín
-- M-14 variante A (proteger `main` con un ruleset): se pide junto con el informe de Fase 0
+- M-14 variante A (proteger `main` con un ruleset)
+- M-03: captura de que el secreto JWT legacy quedó revocado; cambio de las dos contraseñas expuestas (detalle en el chat)
+- Confirmar si usuario2 y los 5 pacientes son de prueba
+- Decisiones: "Reconstruir" o "Adoptar"; nombre de dominio
 ## Decisiones pendientes de Martín
 - Adoptar o reconstruir la base (se pregunta en el informe de Fase 0)
 - Dominio a comprar (se propone en el informe de Fase 0)

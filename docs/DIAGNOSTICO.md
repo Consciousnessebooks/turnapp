@@ -22,6 +22,12 @@ Errores latentes que aparecen en cuanto se pase el login (referencias a cosas qu
 | src/App.jsx:565, 723 | `onPatient(...)` | no es prop de `Professional` → al tocar "Portal" o el ojo |
 | src/App.jsx:367 | `Admin onLogout` | vuelve a la landing sin cerrar la sesión de Supabase |
 
+### Base para el humo de la Fase 1a
+- A `Login` se llega por 4 botones de la landing con dos roles: "Ver demo" y "Admin" en el encabezado (src/App.jsx:387–388), "Demo profesional" y "Super Admin" en el centro (402, 405). El humo recorre los dos roles.
+- El humo no puede pegarle a Auth de producción: intercepta `*.supabase.co` con `page.route`, o el build de prueba va sin variables de Supabase.
+- "Error controlado" = sin `pageerror` ni errores de consola, la pantalla sigue en el formulario y aparece un aviso en español con rol `status` o texto "El ingreso no está disponible en este momento" (sin conexión) / "Email o contraseña incorrectos." (credenciales).
+- Producción no manda CSP: el criterio "sin violaciones de CSP" no prueba nada hasta que la Fase 1b agregue los headers.
+
 No existe `App-MINIMAL.jsx` en ninguna rama ni en el historial (`git log --all -- '*MINIMAL*'` vacío).
 
 ## 3. Mensaje de CSP / eval
@@ -112,4 +118,4 @@ Precios y requisitos (fuentes y fecha en DECISIONES N-03):
 
 Hosting: **Cloudflare Workers con assets estáticos, plan gratuito**. Las peticiones a assets estáticos son gratis e ilimitadas (docs oficiales de precios) y en los términos de Cloudflare no aparece restricción de uso no comercial. Vercel Hobby queda solo hasta la Fase 1c: sus reglas oficiales lo restringen a uso personal no comercial.
 
-Propuesta: **`turnappsalud.com.ar`** en NIC Argentina, DNS delegado a Cloudflare, app en `https://app.turnappsalud.com.ar`. Alternativa: `miturnapp.com.ar`. Martín elige el nombre.
+Propuesta: **`miturnapp.com.ar`** en NIC Argentina, DNS delegado a Cloudflare, app en `https://app.miturnapp.com.ar`. Alternativa: `turnappsalud.com.ar`, descartada como primera opción porque "salud" en cada link, QR o aviso deja ver en un teléfono compartido que la persona usa un servicio de salud (regla 12, criterio conservador), y es más largo para dictar. Martín elige el nombre. Si Martín no tiene Clave Fiscal nivel 2, subirla puede tardar: conviene revisarlo ya (M-06).

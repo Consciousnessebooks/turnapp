@@ -1,8 +1,8 @@
 # PROGRESO — TURNAPP
-Actualizado: 2026-11-16 20:58 (hora Argentina) — Fase 1a revisada; el "21:30" que quedó en main por #2 era un error de hora (real: ~20:30)
-Fase actual: 1a — Hotfix
+Actualizado: 2026-11-17 (hora Argentina) — Fase 1a mergeada (#3) y verificada en producción
+Fase actual: 1b — Reestructura (por empezar)
 Rama de trabajo: claude/stoic-ride-yk4por (base: 84494b1)
-PR abierto: #3 https://github.com/Consciousnessebooks/turnapp/pull/3 (Fase 1a)
+PR abierto: ninguno
 Último commit verificado: 712cc02 — npm ci, build, humo 10/10, gitleaks del PR y bundle sin claves, exit 0 (.verificacion/712cc02/)
 ## Arranque (terminado 2026-11-16)
 - [x] 1. CLAUDE.md cargado; los 7 subagentes aparecen en la herramienta de agentes
@@ -18,9 +18,9 @@ PR abierto: #3 https://github.com/Consciousnessebooks/turnapp/pull/3 (Fase 1a)
 - [x] 2. Versiones exactas, package-lock.json, @playwright/test 1.63.0, .env.example (414ee71)
 - [x] 3. e2e/humo.spec.ts (qa-testing) en 360 y 1280: 10 passed, exit 0 (17505e7)
 - [x] 4. Puerta de revisión: revisor-codigo, qa-testing, frontend-ux y auditor-seguridad APROBADO (712cc02)
-- [ ] 5. PR "Fase 1a — Hotfix" y merge de Martín  ← PRÓXIMO
+- [x] 5. PR #3 mergeado (7996e27). Producción sirve index-CxcV4X5h.js (mismo build que 712cc02); Playwright contra https://turnapp-4typ.vercel.app/: error controlado visible, sin errores de consola
 ## Próximo paso
-Abrir el PR de la Fase 1a y esperar el merge; después, Fase 1b.
+Fase 1b (ESPECIFICACION §9): CI propio, lint/typecheck/tests, headers de seguridad, Vite actualizado y pendientes de N-10.
 ## Esperando a Martín
 - Decisiones: "Reconstruir" o "Adoptar"; nombre de dominio; si las cuentas y los 5 pacientes son de prueba
 ## Decisiones pendientes de Martín

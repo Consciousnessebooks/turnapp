@@ -71,6 +71,19 @@ Martín sube el kit a `main` antes de la primera sesión (guía). Por eso `CLAUD
 ## Registro de decisiones nuevas (Claude Code)
 _(agregá acá, la más nueva arriba)_
 
+### N-10 · 2026-11-16 · Fase 1a: alcance del hotfix
+- Las claves de Supabase salen del código y pasan a `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` (§5.5). La clave legacy embebida ya estaba deshabilitada, así que producción no pierde nada: sin variables, el login muestra "El ingreso no está disponible en este momento". Las variables con la clave publishable nueva se cargan en Vercel cuando la base esté lista (Fase 2/3): hoy, aunque el login anduviera, no hay grants y los nombres no coinciden.
+- Fuera del hotfix (quedan para la 1b): actualizar Vite a una versión mayor por `npm audit` (1 high y 1 moderate, solo del servidor de desarrollo, no del build publicado), el resto de los datos de demo en pantallas y la reestructura.
+- Verificación de rol con `maybeSingle()`: sin fila es "sin acceso" (aviso y cierre de sesión); un error de red o permisos muestra "El ingreso no está disponible" y no cierra la sesión (observación de frontend-ux).
+- Pendientes de revisor-codigo para la 1b: reemplazar `notify(error.message)` por mensajes propios (altas, ediciones, generación de turnos); `addPatient` solo local con token `Math.random` (usar `onAddPatient` o estado vacío); textos "Ver demo"/"Demo profesional" de la landing. Se corrigió en la 1a la doble verificación de rol al montar (solo `onAuthStateChange`).
+- auditor-seguridad: "Salir" y el cierre por "sin acceso" usan `cerrarSesion()` (si falla el cierre global, borra la sesión local); el cliente no se crea si la clave es `sb_secret_` o un JWT `service_role`. **Condición antes de cargar las variables en Vercel:** reemplazar todo `notify(error.message)` por mensajes propios. El `service_role` filtrado del historial queda cubierto por la revocación del secreto HS256 (N-08). gitleaks en CI va con `--log-opts=origin/main..HEAD` (el historial completo siempre da 3 hallazgos viejos). Headers de seguridad (CSP, nosniff, Referrer-Policy, frame-ancestors) y `npm audit --audit-level=high` en 0: Fase 1b.
+- Pendientes de revisor-codigo (re-revisión) para la 1b: verificar el rol solo en `INITIAL_SESSION`/`SIGNED_IN` o al cambiar de usuario (hoy también en `TOKEN_REFRESHED`, ya pasaba en main); aviso fijo en consola si `claveEsSecreta` rechaza la clave.
+- Pendientes de frontend-ux para la 1b: decidir por `error.code` (email no confirmado), avisar "Sesión iniciada" después del rol, región viva siempre montada, contrastes del Toast y textos grises, inputs de 16 px y rem.
+- Se agrega `role="status"` al aviso (observación de qa-testing) para que el error sea accesible y el humo lo busque por rol.
+
+### N-09 · 2026-11-16 · PR #2 squash-mergeado; rama de la sesión reutilizada
+#2 entró a la rama principal como 84494b1 (squash). Como la sesión solo puede pushear a `claude/stoic-ride-yk4por` y force push está prohibido, se mergeó la rama principal sobre la rama de la sesión (2997a58) y se aplicó encima el hotfix: el diff del PR contiene solo la Fase 1a. M-14 verificado por API: ruleset `proteger-main` activo, sin bypass, con deletion, non_fast_forward y pull_request (0 aprobaciones). M-03: Martín confirmó el cambio de la contraseña de la base y de Gmail ("listo 1, listo 2", 2026-11-16); no hay forma de verificarlo con solo lectura.
+
 ### N-08 · 2026-11-16 · M-03: secreto JWT legacy revocado (captura de Martín)
 Captura de "Project Settings" → "JWT Keys" → pestaña "JWT Signing Keys": clave "Current" ECC (P-256); "Previously used keys" vacío; en "Revoked keys" la HS256 (Shared Secret), rotada "7 hours ago" al 2026-11-16. Los JWT legacy (anon y service_role) ya no se aceptan. Corrección al pedido: el botón "Migrate JWT secret" no aparece cuando la migración ya está hecha (https://supabase.com/docs/guides/auth/signing-keys, leído 2026-11-16).
 

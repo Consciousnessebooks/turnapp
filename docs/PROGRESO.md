@@ -1,9 +1,9 @@
 # PROGRESO — TURNAPP
-Actualizado: 2026-11-16 21:30 (hora Argentina) — Fase 0 hecha, en revisión
-Fase actual: 0 — Diagnóstico
-Rama de trabajo: claude/stoic-ride-yk4por (base: main@310c1f9)
-PR abierto: #2 https://github.com/Consciousnessebooks/turnapp/pull/2 (Fase 0)
-Último commit verificado: 6110bb5 — Fase 0 (diagnóstico), evidencia en .verificacion/6110bb5/
+Actualizado: 2026-11-16 20:58 (hora Argentina) — Fase 1a revisada; el "21:30" que quedó en main por #2 era un error de hora (real: ~20:30)
+Fase actual: 1a — Hotfix
+Rama de trabajo: claude/stoic-ride-yk4por (base: 84494b1)
+PR abierto: #3 https://github.com/Consciousnessebooks/turnapp/pull/3 (Fase 1a)
+Último commit verificado: 712cc02 — npm ci, build, humo 10/10, gitleaks del PR y bundle sin claves, exit 0 (.verificacion/712cc02/)
 ## Arranque (terminado 2026-11-16)
 - [x] 1. CLAUDE.md cargado; los 7 subagentes aparecen en la herramienta de agentes
 - [x] 2. `bash .claude/hooks/probar-guardia.sh` → "TODAS LAS PRUEBAS PASARON (118 casos)", exit 0. `git push origin main` real → "BLOQUEADO por .claude/hooks/guardia.sh: push a main prohibido"
@@ -11,26 +11,18 @@ PR abierto: #2 https://github.com/Consciousnessebooks/turnapp/pull/2 (Fase 0)
 - [x] 4. Repo público (owner User), `main` sin protección (404 "Branch not protected"), rulesets `[]` → modo A, M-14 variante A. Push de `.github/workflows/` permitido (4413979, borrado en 7fd26a7). API de environments: 403 del proxy (NO VERIFICADO)
 - [x] 5. Entorno: node v22.23.4, npm 10.9.9, Docker OK (`docker run --rm hello-world` exit 0), supabase CLI 3.2.0 por npm OK, psql presente, gitleaks no instalado. HTTP: registry.npmjs.org 200, hszobstcatbyzijbdnpv.supabase.co/rest/v1/ 401 (esperado sin clave), cdn.playwright.dev 400, developer.mozilla.org 302, fcm.googleapis.com 404, turnapp-4typ.vercel.app 200. Consulta de solo lectura `select 1 as ok` → HTTP 201 `[{"ok":1}]`
 - [x] 6. Pedido pendiente: M-14 variante A (se manda con el informe de Fase 0). M-01 completo.
+## Fase 0 (mergeada 2026-11-16, #2 → 84494b1)
+- Diagnóstico en docs/DIAGNOSTICO.md; 5 revisores APROBADO.
 ## Checklist de la fase
-- [x] 1. docs/BACKLOG.md, docs/TESTS.md (8 reglas + flujos), docs/MANUAL-OPERACION.md creados
-- [x] 2. Repo leído: un solo src/App.jsx (1182 líneas); no existe App-MINIMAL.jsx; sin lockfile; sin config de Vercel en el repo
-- [x] 3. `npm ci` exit 1 (sin lockfile, diagnóstico) · `npm install` exit 0 · `npm run build` exit 0 → `index-DAN7R_GO.js 440.38 kB` (mismo hash que producción)
-- [x] 4. Crash reproducido con Playwright en local y producción: `e is not a function` → sourcemap src/App.jsx:456 `onSuccess` (App pasa `onLogin`, línea 352). CSP/eval: extensión del navegador (producción no manda CSP)
-- [x] 5. gitleaks v8.21.2 (Docker) exit 1, 3 hallazgos (detalle solo en el chat). Bundle de producción: solo JWT `anon`. Claves legacy deshabilitadas (API: "Legacy API keys are disabled")
-- [x] 6. Introspección §13.1 por la consulta de solo lectura (HTTP 201); cron.job no existe (pg_cron ausente); versión commiteable en docs/diagnostico/esquema-2026-11-16.json
-- [x] 7. Real vs. esperado en DIAGNOSTICO §6; fixture aplica en postgres:17.6 (11 tablas, 2 vistas, 9 políticas, 5 funciones)
-- [x] 8. Conteo exacto: 2 profesionales, 5 pacientes, 16 turnos (abril 2026), 1 super_admin
-- [x] 9. Recomendación: reconstruir (DECISIONES N-04)
-- [x] 10. Dominio: miturnapp.com.ar libre por RDAP; NIC ARS 8.500/año (NO VERIFICADO en nic.ar directo); hosting Cloudflare Workers
-- [x] 11. Puerta de revisión: los 5 subagentes APROBADO (62c83c8); PR #2 abierto
-- [ ] 12. Merge de Martín → subir la Fase 1a  ← PRÓXIMO
+- [x] 1. Login conectado a handleLogin con error controlado; props del panel; Admin cierra sesión; claves desde variables (394f615)
+- [x] 2. Versiones exactas, package-lock.json, @playwright/test 1.63.0, .env.example (414ee71)
+- [x] 3. e2e/humo.spec.ts (qa-testing) en 360 y 1280: 10 passed, exit 0 (17505e7)
+- [x] 4. Puerta de revisión: revisor-codigo, qa-testing, frontend-ux y auditor-seguridad APROBADO (712cc02)
+- [ ] 5. PR "Fase 1a — Hotfix" y merge de Martín  ← PRÓXIMO
 ## Próximo paso
-Esperar el merge de #2. La Fase 1a (hotfix) está lista en la rama local `fase-1a-hotfix-local` (commit cb3c62d) y se sube a `claude/stoic-ride-yk4por` cuando se mergee la Fase 0 (el entorno no permite pushear otra rama).
+Abrir el PR de la Fase 1a y esperar el merge; después, Fase 1b.
 ## Esperando a Martín
-- M-14 variante A (proteger `main` con un ruleset)
-- M-03: secreto JWT legacy REVOCADO (captura de Martín, 2026-11-16: HS256 en "Revoked keys", clave actual ECC P-256). Quedan los demás pasos de seguridad (detalle en el chat)
-- Confirmar si las cuentas y los 5 pacientes son de prueba (detalle en el chat)
-- Decisiones: "Reconstruir" o "Adoptar"; nombre de dominio
+- Decisiones: "Reconstruir" o "Adoptar"; nombre de dominio; si las cuentas y los 5 pacientes son de prueba
 ## Decisiones pendientes de Martín
 - Adoptar o reconstruir la base (se pregunta en el informe de Fase 0)
 - Dominio a comprar (se propone en el informe de Fase 0)

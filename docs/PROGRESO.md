@@ -22,10 +22,8 @@ PR abierto: ninguno
 ## Próximo paso
 Fase 1b (ESPECIFICACION §9): CI propio, lint/typecheck/tests, headers de seguridad, Vite actualizado y pendientes de N-10.
 ## Esperando a Martín
-- Decisiones: "Reconstruir" o "Adoptar"; nombre de dominio; si las cuentas y los 5 pacientes son de prueba
+- M-06 parte 1: comprar miturnapp.com.ar en NIC Argentina (decisiones de base y datos ya tomadas: N-11)
 ## Decisiones pendientes de Martín
-- Adoptar o reconstruir la base (se pregunta en el informe de Fase 0)
-- Dominio a comprar (se propone en el informe de Fase 0)
 - Profesional piloto (se pregunta en la Puerta del piloto, M-16)
 ## Problemas conocidos e intentos fallidos
 - La sesión solo puede pushear a `claude/stoic-ride-yk4por` (restricción del entorno): la Fase 0 usa esa rama en vez de `fase-0-diagnostico` (ver DECISIONES).

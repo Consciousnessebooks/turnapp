@@ -71,6 +71,12 @@ Martín sube el kit a `main` antes de la primera sesión (guía). Por eso `CLAUD
 ## Registro de decisiones nuevas (Claude Code)
 _(agregá acá, la más nueva arriba)_
 
+### N-11 · 2026-11-17 · Decisiones de Martín sobre base, dominio y datos de prueba
+Textual de Martín (chat, 2026-11-17): "1 Reconstruir, 2 esta bien ese dominio, pero hay que conseguirlo y migrar todo, o como?, 3 Son todos de prueba hasta que haya un profesional real".
+- Base: **Reconstruir** (§5.4). La migración de reconstrucción lleva `-- APROBADO-POR-MARTIN: AAAA-MM-DD PR #n` y cita esta entrada.
+- Dominio: **miturnapp.com.ar** aprobado; falta comprarlo (M-06). No hay datos que migrar: el dominio solo cambia desde dónde se sirve la app; la base sigue en el mismo proyecto de Supabase. El cambio de origen se hace en la Fase 1c, antes de que ningún paciente instale la app (§5.1).
+- Datos: los 3 usuarios de Auth, los 2 profesionales, los 5 pacientes y los 16 turnos son de prueba; se pueden borrar en la reconstrucción.
+
 ### N-10 · 2026-11-16 · Fase 1a: alcance del hotfix
 - Las claves de Supabase salen del código y pasan a `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` (§5.5). La clave legacy embebida ya estaba deshabilitada, así que producción no pierde nada: sin variables, el login muestra "El ingreso no está disponible en este momento". Las variables con la clave publishable nueva se cargan en Vercel cuando la base esté lista (Fase 2/3): hoy, aunque el login anduviera, no hay grants y los nombres no coinciden.
 - Fuera del hotfix (quedan para la 1b): actualizar Vite a una versión mayor por `npm audit` (1 high y 1 moderate, solo del servidor de desarrollo, no del build publicado), el resto de los datos de demo en pantallas y la reestructura.
